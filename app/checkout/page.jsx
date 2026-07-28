@@ -115,7 +115,7 @@ export default function CheckoutPage() {
         key: orderData.key,
         amount: orderData.amount,
         currency: orderData.currency,
-        name: 'MADANI PRODUCT',
+        name: 'ROQAYYA',
         description: 'E-Commerce Order Payment',
         order_id: orderData.orderId,
         handler: async function (response) {

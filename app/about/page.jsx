@@ -16,10 +16,10 @@ export default function AboutPage() {
             <Sparkles className="w-3.5 h-3.5" /> Empowering Excellence
           </span>
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-            About MADANI PRODUCT
+            About ROQAYYA
           </h1>
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-            MADANI PRODUCT is a premium Islamic wear store — Pagdi/Amama, Jubba/Aba, Kurta/Thobe, Rumal, Topi and more, crafted for quality and elegance. Built with speed, security, and customer delight at its core.
+            ROQAYYA is a premium Islamic wear store — Pagdi/Amama, Jubba/Aba, Kurta/Thobe, Rumal, Topi and more, crafted for quality and elegance. Built with speed, security, and customer delight at its core.
           </p>
         </div>
 

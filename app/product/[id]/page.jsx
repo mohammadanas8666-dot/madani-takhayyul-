@@ -16,7 +16,7 @@ import {
   Loader2
 } from 'lucide-react';
 
-const PLACEHOLDER_IMG = 'https://placehold.co/800x800/1a1e2e/d4af37?text=MADANI+PRODUCT';
+const PLACEHOLDER_IMG = 'https://placehold.co/800x800/1a1e2e/d4af37?text=ROQAYYA';
 
 export default function ProductDetailPage({ params }) {
   const { id } = use(params);

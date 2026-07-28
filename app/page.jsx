@@ -1,26 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Header from '@/components/Header';
 import HeroSlider from '@/components/HeroSlider';
 import ProductGrid from '@/components/ProductGrid';
-import { ShieldCheck, Truck, Clock, RefreshCw } from 'lucide-react';
 
 export default function HomePage() {
   const [products, setProducts] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
 
-  const fetchProducts = async (cat = selectedCategory, search = searchTerm, pageNum = 1) => {
+  const fetchProducts = async (search = searchTerm, pageNum = 1) => {
     setLoading(true);
     try {
       let url = `/api/products?page=${pageNum}&limit=12`;
-      if (cat !== 'All') url += `&category=${encodeURIComponent(cat)}`;
       if (search) url += `&search=${encodeURIComponent(search)}`;
 
       const res = await fetch(url);
@@ -40,7 +38,7 @@ export default function HomePage() {
         setHasMore(false);
       }
 
-      // Featured products for the hero slider — real DB data only
+      // Featured products for the hero slider — real DB data only, owner-controlled
       const featuredRes = await fetch('/api/products?featured=true&limit=20');
       const featuredData = await featuredRes.json();
       if (featuredData.success) {
@@ -60,13 +58,13 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    fetchProducts(selectedCategory, searchTerm, 1);
-  }, [selectedCategory, searchTerm]);
+    fetchProducts(searchTerm, 1);
+  }, [searchTerm]);
 
   const handleLoadMore = () => {
     const nextPage = page + 1;
     setPage(nextPage);
-    fetchProducts(selectedCategory, searchTerm, nextPage);
+    fetchProducts(searchTerm, nextPage);
   };
 
   return (
@@ -77,56 +75,16 @@ export default function HomePage() {
         onSearchChange={(val) => setSearchTerm(val)}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Main Content Area — kept minimal: auto-sliding featured strip + product grid only */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
 
-        {/* Featured Slider */}
+        {/* Auto-Sliding Featured Strip — starts sliding right automatically on load, owner-controlled via dashboard */}
         <HeroSlider featuredProducts={featuredProducts} />
 
-        {/* Store Trust Badges Banner */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 my-8 p-4 bg-dark-900/60 border border-gold-900/40 rounded-2xl">
-          <div className="flex items-center gap-3 p-2">
-            <Truck className="w-8 h-8 text-gold-400 shrink-0" />
-            <div>
-              <h4 className="text-xs font-bold text-white">All India Delivery</h4>
-              <p className="text-[10px] text-slate-400">Fast & reliable shipping</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 p-2">
-            <ShieldCheck className="w-8 h-8 text-gold-400 shrink-0" />
-            <div>
-              <h4 className="text-xs font-bold text-white">Razorpay Secure</h4>
-              <p className="text-[10px] text-slate-400">256-bit encrypted checkout</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 p-2">
-            <RefreshCw className="w-8 h-8 text-gold-400 shrink-0" />
-            <div>
-              <h4 className="text-xs font-bold text-white">Premium Quality</h4>
-              <p className="text-[10px] text-slate-400">Feel the premium difference</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 p-2">
-            <Clock className="w-8 h-8 text-gold-400 shrink-0" />
-            <div>
-              <h4 className="text-xs font-bold text-white">Live Tracking</h4>
-              <p className="text-[10px] text-slate-400">Step-by-step order updates</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Responsive Product Grid */}
+        {/* Product Grid — 3 columns, infinite scroll, no category filters */}
         <ProductGrid
           products={products}
           totalCount={totalCount}
-          selectedCategory={selectedCategory}
-          onCategoryChange={(cat) => {
-            setSelectedCategory(cat);
-            setPage(1);
-          }}
           onLoadMore={handleLoadMore}
           hasMore={hasMore}
           loading={loading}
@@ -134,23 +92,20 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-dark-900 border-t border-gold-900/40 text-slate-400 py-10 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
-          <div>
-            <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-gold-600 via-gold-400 to-gold-600 flex items-center justify-center text-dark-950 font-bold text-sm">
-                M
-              </div>
-              <span className="font-extrabold text-lg text-white">MADANI PRODUCT</span>
+      <footer className="bg-dark-900 border-t border-gold-900/40 text-slate-400 py-8 mt-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+          <div className="flex items-center justify-center md:justify-start gap-2">
+            <div className="relative w-7 h-7 rounded-full overflow-hidden shrink-0">
+              <Image src="/logo.png" alt="ROQAYYA" fill className="object-cover" />
             </div>
-            <p className="text-xs text-slate-400 max-w-sm">
-              Premium Islamic wear — Pagdi/Amama, Jubba/Aba, Kurta/Thobe, Rumal, Topi and more. Elegance in Faith.
-            </p>
+            <div className="flex flex-col leading-none text-left">
+              <span className="font-extrabold text-base text-white">ROQAYYA</span>
+              <span className="text-[9px] text-slate-500">a madni takhayyul product</span>
+            </div>
           </div>
 
-          <div className="text-xs space-y-1">
-            <p>© {new Date().getFullYear()} MADANI PRODUCT. All rights reserved.</p>
-            <p className="text-slate-500">Powered by Next.js, MongoDB Atlas, Firebase & Razorpay.</p>
+          <div className="text-xs">
+            <p>© {new Date().getFullYear()} ROQAYYA. All rights reserved.</p>
           </div>
         </div>
       </footer>

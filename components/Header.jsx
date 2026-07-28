@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Menu,
   Search,
@@ -45,12 +46,17 @@ export default function Header({ onSearchChange, searchTerm = '' }) {
           {/* Center: Logo + Site Name */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-gold-600 via-gold-400 to-gold-500 flex items-center justify-center font-black text-xl text-dark-950 shadow-md shadow-gold-900/40 group-hover:scale-105 transition-transform">
-                M
+              <div className="relative w-9 h-9 rounded-full overflow-hidden shadow-md shadow-gold-900/40 group-hover:scale-105 transition-transform shrink-0">
+                <Image src="/logo.png" alt="ROQAYYA" fill className="object-cover" />
               </div>
-              <span className="font-extrabold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-gold-200 to-gold-400">
-                MADANI PRODUCT
-              </span>
+              <div className="flex flex-col leading-none">
+                <span className="font-extrabold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-gold-200 to-gold-400">
+                  ROQAYYA
+                </span>
+                <span className="text-[9px] text-slate-400 tracking-wide hidden sm:block">
+                  a madni takhayyul product
+                </span>
+              </div>
             </Link>
           </div>
 

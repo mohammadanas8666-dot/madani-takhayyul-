@@ -42,3 +42,12 @@ body {
 .animate-scaleUp {
   animation: scaleUp 0.2s ease-out forwards;
 }
+
+/* Hide scrollbar for thumbnail sliders / horizontal-scroll rows across browsers */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
