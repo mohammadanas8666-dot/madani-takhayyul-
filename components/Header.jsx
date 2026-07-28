@@ -2,16 +2,16 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { 
-  Menu, 
-  Search, 
-  ShoppingBag, 
-  Truck, 
-  Info, 
-  User as UserIcon, 
-  ShieldCheck, 
-  LogOut, 
-  X 
+import {
+  Menu,
+  Search,
+  ShoppingBag,
+  Truck,
+  Info,
+  User as UserIcon,
+  ShieldCheck,
+  LogOut,
+  X
 } from 'lucide-react';
 import SideMenu from './SideMenu';
 import AuthModal from './AuthModal';
@@ -27,14 +27,14 @@ export default function Header({ onSearchChange, searchTerm = '' }) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 text-white shadow-lg">
+      <header className="sticky top-0 z-40 bg-dark-900/95 backdrop-blur-md border-b border-gold-900/40 text-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-          
+
           {/* Left: 3-line hamburger menu */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsSideMenuOpen(true)}
-              className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="p-2 rounded-lg text-slate-300 hover:text-gold-400 hover:bg-dark-800 transition-colors focus:outline-none focus:ring-2 focus:ring-gold-500"
               aria-label="Open navigation menu"
               id="hamburger-menu-btn"
             >
@@ -45,11 +45,11 @@ export default function Header({ onSearchChange, searchTerm = '' }) {
           {/* Center: Logo + Site Name */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-emerald-400 flex items-center justify-center font-black text-xl shadow-md shadow-emerald-900/40 group-hover:scale-105 transition-transform">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-gold-600 via-gold-400 to-gold-500 flex items-center justify-center font-black text-xl text-dark-950 shadow-md shadow-gold-900/40 group-hover:scale-105 transition-transform">
                 M
               </div>
-              <span className="font-extrabold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-emerald-400">
-                MADANI
+              <span className="font-extrabold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-gold-200 to-gold-400">
+                MADANI PRODUCT
               </span>
             </Link>
           </div>
@@ -59,7 +59,7 @@ export default function Header({ onSearchChange, searchTerm = '' }) {
             {/* Search trigger */}
             <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="p-2 rounded-lg text-slate-300 hover:text-emerald-400 hover:bg-slate-800 transition-colors"
+              className="p-2 rounded-lg text-slate-300 hover:text-gold-400 hover:bg-dark-800 transition-colors"
               title="Search products"
               id="search-icon-btn"
             >
@@ -69,7 +69,7 @@ export default function Header({ onSearchChange, searchTerm = '' }) {
             {/* Track Order Icon */}
             <Link
               href="/track"
-              className="p-2 rounded-lg text-slate-300 hover:text-emerald-400 hover:bg-slate-800 transition-colors flex items-center gap-1"
+              className="p-2 rounded-lg text-slate-300 hover:text-gold-400 hover:bg-dark-800 transition-colors flex items-center gap-1"
               title="Track Order"
               id="track-order-icon-btn"
             >
@@ -80,13 +80,13 @@ export default function Header({ onSearchChange, searchTerm = '' }) {
             {/* Cart Icon */}
             <Link
               href="/cart"
-              className="p-2 rounded-lg text-slate-300 hover:text-emerald-400 hover:bg-slate-800 transition-colors relative"
+              className="p-2 rounded-lg text-slate-300 hover:text-gold-400 hover:bg-dark-800 transition-colors relative"
               title="View Cart"
               id="cart-icon-btn"
             >
               <ShoppingBag className="w-5 h-5" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-emerald-500 text-slate-950 font-black text-xs w-5 h-5 rounded-full flex items-center justify-center shadow-md animate-pulse">
+                <span className="absolute -top-1 -right-1 bg-gold-500 text-dark-950 font-black text-xs w-5 h-5 rounded-full flex items-center justify-center shadow-md animate-pulse">
                   {cartCount}
                 </span>
               )}
@@ -95,7 +95,7 @@ export default function Header({ onSearchChange, searchTerm = '' }) {
             {/* About Icon */}
             <Link
               href="/about"
-              className="p-2 rounded-lg text-slate-300 hover:text-emerald-400 hover:bg-slate-800 transition-colors hidden sm:block"
+              className="p-2 rounded-lg text-slate-300 hover:text-gold-400 hover:bg-dark-800 transition-colors hidden sm:block"
               title="About Us"
               id="about-icon-btn"
             >
@@ -106,10 +106,10 @@ export default function Header({ onSearchChange, searchTerm = '' }) {
             {isAdmin && (
               <Link
                 href="/admin/products"
-                className="hidden lg:flex items-center gap-1 text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-1.5 rounded-lg hover:bg-amber-500/30 transition-colors"
+                className="hidden lg:flex items-center gap-1 text-xs font-bold bg-gold-500/20 text-gold-300 border border-gold-500/40 px-2.5 py-1.5 rounded-lg hover:bg-gold-500/30 transition-colors"
                 id="admin-dashboard-link"
               >
-                <ShieldCheck className="w-4 h-4 text-amber-400" />
+                <ShieldCheck className="w-4 h-4 text-gold-400" />
                 <span>Admin</span>
               </Link>
             )}
@@ -122,7 +122,7 @@ export default function Header({ onSearchChange, searchTerm = '' }) {
                 </span>
                 <button
                   onClick={logout}
-                  className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-slate-800 transition-colors"
+                  className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-dark-800 transition-colors"
                   title="Sign Out"
                   id="signout-btn"
                 >
@@ -132,7 +132,7 @@ export default function Header({ onSearchChange, searchTerm = '' }) {
             ) : (
               <button
                 onClick={() => setIsAuthModalOpen(true)}
-                className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs sm:text-sm shadow-md hover:shadow-emerald-500/20 transition-all"
+                className="flex items-center gap-1.5 bg-gold-500 hover:bg-gold-400 text-dark-950 font-bold px-3 py-1.5 rounded-lg text-xs sm:text-sm shadow-md hover:shadow-gold-500/20 transition-all"
                 id="login-btn"
               >
                 <UserIcon className="w-4 h-4" />
@@ -144,12 +144,12 @@ export default function Header({ onSearchChange, searchTerm = '' }) {
 
         {/* Expandable Search Bar */}
         {isSearchOpen && (
-          <div className="border-t border-slate-800 bg-slate-950/90 p-3 animate-fadeIn">
+          <div className="border-t border-gold-900/40 bg-dark-950/90 p-3 animate-fadeIn">
             <div className="max-w-3xl mx-auto flex items-center gap-2">
               <Search className="w-5 h-5 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search products by title..."
+                placeholder="Search Pagdi, Jubba, Kurta, Rumal..."
                 value={searchTerm}
                 onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
                 className="w-full bg-transparent text-white placeholder-slate-500 focus:outline-none text-sm"
