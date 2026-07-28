@@ -55,14 +55,14 @@ export default function AdminUsersPage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-dark-950 text-slate-100 flex flex-col">
       <AdminNav />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Users className="w-6 h-6 text-emerald-400" />
+            <Users className="w-6 h-6 text-gold-400" />
             <h2 className="text-2xl font-black text-white">Registered Users ({users.length})</h2>
           </div>
 
@@ -73,16 +73,16 @@ export default function AdminUsersPage() {
               placeholder="Search users..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-emerald-500 w-full sm:w-64"
+              className="bg-dark-900 border border-gold-900/40 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-gold-500 w-full sm:w-64"
             />
           </div>
         </div>
 
         {/* Users Table */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+        <div className="bg-dark-900/80 border border-gold-900/40 rounded-3xl overflow-hidden shadow-2xl">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-950 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-800">
+              <thead className="bg-dark-950 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-gold-900/40">
                 <tr>
                   <th className="p-4">User</th>
                   <th className="p-4">Email</th>
@@ -92,10 +92,10 @@ export default function AdminUsersPage() {
                   <th className="p-4 text-right">Role Toggle</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-gold-900/20/60">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="p-8 text-center text-emerald-400">
+                    <td colSpan={6} className="p-8 text-center text-gold-400">
                       <Loader2 className="w-6 h-6 animate-spin mx-auto" />
                     </td>
                   </tr>
@@ -107,9 +107,9 @@ export default function AdminUsersPage() {
                   </tr>
                 ) : (
                   filteredUsers.map((user) => (
-                    <tr key={user._id} className="hover:bg-slate-800/40 transition-colors">
+                    <tr key={user._id} className="hover:bg-dark-800/40 transition-colors">
                       <td className="p-4 font-bold text-white flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black">
+                        <div className="w-7 h-7 rounded-lg bg-gold-500/20 text-gold-400 flex items-center justify-center font-black">
                           {user.name?.[0]?.toUpperCase() || 'U'}
                         </div>
                         <span>{user.name}</span>
@@ -128,7 +128,7 @@ export default function AdminUsersPage() {
                           className={`px-3 py-1 rounded-full text-[10px] font-extrabold border ${
                             user.role === 'admin'
                               ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                              : 'bg-slate-800 text-slate-300 border-slate-700'
+                              : 'bg-dark-800 text-slate-300 border-gold-900/50'
                           }`}
                         >
                           {user.role}
@@ -142,7 +142,7 @@ export default function AdminUsersPage() {
                       <td className="p-4 text-right">
                         <button
                           onClick={() => handleToggleRole(user._id, user.role)}
-                          className="px-3 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold border border-slate-700 transition-all"
+                          className="px-3 py-1 rounded-xl bg-dark-800 hover:bg-dark-800/70 text-slate-300 hover:text-white text-xs font-semibold border border-gold-900/50 transition-all"
                         >
                           Make {user.role === 'admin' ? 'Customer' : 'Admin'}
                         </button>
