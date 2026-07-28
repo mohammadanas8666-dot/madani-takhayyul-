@@ -13,14 +13,14 @@ export default function CartPage() {
   const grandTotal = cartTotal + shippingFee;
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+    <div className="min-h-screen flex flex-col bg-dark-950 text-slate-100">
       <Header />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-3">
-            <ShoppingBag className="w-7 h-7 text-emerald-400" />
+            <ShoppingBag className="w-7 h-7 text-gold-400" />
             Shopping Cart ({cart.length})
           </h1>
           {cart.length > 0 && (
@@ -34,7 +34,7 @@ export default function CartPage() {
         </div>
 
         {cart.length === 0 ? (
-          <div className="p-12 text-center bg-slate-900/60 border border-slate-800 rounded-3xl max-w-md mx-auto my-12 shadow-2xl">
+          <div className="p-12 text-center bg-dark-900/60 border border-gold-900/40 rounded-3xl max-w-md mx-auto my-12 shadow-2xl">
             <ShoppingBag className="w-16 h-16 text-slate-600 mx-auto mb-4 animate-bounce" />
             <h2 className="text-xl font-bold text-white mb-2">Your cart is empty</h2>
             <p className="text-slate-400 text-xs mb-6">
@@ -42,7 +42,7 @@ export default function CartPage() {
             </p>
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-xs shadow-lg transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gold-600 hover:bg-gold-500 text-dark-950 font-black text-xs shadow-lg transition-all"
             >
               <ArrowLeft className="w-4 h-4" /> Start Shopping
             </Link>
@@ -57,34 +57,34 @@ export default function CartPage() {
                 return (
                   <div
                     key={item._id}
-                    className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-slate-900/70 border border-slate-800 rounded-2xl shadow-md hover:border-slate-700 transition-colors"
+                    className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-dark-900/70 border border-gold-900/40 rounded-2xl shadow-md hover:border-gold-900/50 transition-colors"
                   >
                     <div className="flex items-center gap-4 w-full sm:w-auto">
-                      <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-slate-950 shrink-0 border border-slate-800">
+                      <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-dark-950 shrink-0 border border-gold-900/40">
                         <Image src={img} alt={item.name} fill className="object-cover" />
                       </div>
                       <div>
-                        <span className="text-[10px] font-bold text-emerald-400 uppercase">
+                        <span className="text-[10px] font-bold text-gold-400 uppercase">
                           {item.category || 'General'}
                         </span>
                         <h3 className="font-bold text-white text-sm line-clamp-1">{item.name}</h3>
-                        <p className="text-emerald-400 font-extrabold text-sm mt-0.5">₹{item.price}</p>
+                        <p className="text-gold-400 font-extrabold text-sm mt-0.5">₹{item.price}</p>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between w-full sm:w-auto gap-6 border-t sm:border-t-0 border-slate-800/80 pt-3 sm:pt-0">
+                    <div className="flex items-center justify-between w-full sm:w-auto gap-6 border-t sm:border-t-0 border-gold-900/40/80 pt-3 sm:pt-0">
                       {/* Quantity modifier */}
-                      <div className="flex items-center border border-slate-800 bg-slate-950 rounded-xl overflow-hidden">
+                      <div className="flex items-center border border-gold-900/40 bg-dark-950 rounded-xl overflow-hidden">
                         <button
                           onClick={() => updateQuantity(item._id, -1)}
-                          className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800"
+                          className="p-1.5 text-slate-400 hover:text-white hover:bg-dark-800"
                         >
                           <Minus className="w-3.5 h-3.5" />
                         </button>
                         <span className="px-3 text-xs font-bold text-white">{item.quantity}</span>
                         <button
                           onClick={() => updateQuantity(item._id, 1)}
-                          className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800"
+                          className="p-1.5 text-slate-400 hover:text-white hover:bg-dark-800"
                         >
                           <Plus className="w-3.5 h-3.5" />
                         </button>
@@ -98,7 +98,7 @@ export default function CartPage() {
                       {/* Remove Button */}
                       <button
                         onClick={() => removeFromCart(item._id)}
-                        className="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-slate-800 transition-colors"
+                        className="p-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-dark-800 transition-colors"
                         title="Remove item"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -110,8 +110,8 @@ export default function CartPage() {
             </div>
 
             {/* Order Summary Sidebar */}
-            <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 h-fit space-y-6 shadow-2xl">
-              <h2 className="text-lg font-black text-white border-b border-slate-800 pb-4">
+            <div className="bg-dark-900/90 border border-gold-900/40 rounded-3xl p-6 h-fit space-y-6 shadow-2xl">
+              <h2 className="text-lg font-black text-white border-b border-gold-900/40 pb-4">
                 Order Summary
               </h2>
 
@@ -123,21 +123,21 @@ export default function CartPage() {
                 <div className="flex justify-between text-slate-400">
                   <span>Shipping Fee</span>
                   {shippingFee === 0 ? (
-                    <span className="text-emerald-400 font-bold uppercase text-xs">Free</span>
+                    <span className="text-gold-400 font-bold uppercase text-xs">Free</span>
                   ) : (
                     <span className="text-white font-bold">₹{shippingFee}</span>
                   )}
                 </div>
 
-                <div className="border-t border-slate-800 pt-3 flex justify-between text-base font-black text-white">
+                <div className="border-t border-gold-900/40 pt-3 flex justify-between text-base font-black text-white">
                   <span>Grand Total</span>
-                  <span className="text-emerald-400 text-xl">₹{grandTotal}</span>
+                  <span className="text-gold-400 text-xl">₹{grandTotal}</span>
                 </div>
               </div>
 
               <Link
                 href="/checkout"
-                className="w-full py-3.5 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02]"
+                className="w-full py-3.5 px-6 rounded-xl bg-gold-600 hover:bg-gold-500 text-dark-950 font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-gold-500/20 transition-all hover:scale-[1.02]"
               >
                 Proceed to Checkout <ArrowRight className="w-4 h-4" />
               </Link>
