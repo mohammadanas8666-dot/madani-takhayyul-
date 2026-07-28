@@ -35,23 +35,23 @@ export default function AdminBalancePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-dark-950 text-slate-100 flex flex-col">
       <AdminNav />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
         {/* Title */}
         <div className="flex items-center gap-3">
-          <DollarSign className="w-6 h-6 text-emerald-400" />
+          <DollarSign className="w-6 h-6 text-gold-400" />
           <h2 className="text-2xl font-black text-white">Financial Balance & Revenue</h2>
         </div>
 
         {/* Financial KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+          <div className="bg-dark-900/80 border border-gold-900/40 rounded-3xl p-6 shadow-xl relative overflow-hidden">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Sales</span>
-              <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400">
+              <div className="p-2 rounded-xl bg-gold-500/20 text-gold-400">
                 <TrendingUp className="w-5 h-5" />
               </div>
             </div>
@@ -59,7 +59,7 @@ export default function AdminBalancePage() {
             <p className="text-[11px] text-slate-400 mt-1">Across {summary.totalOrders || 0} total customer orders</p>
           </div>
 
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+          <div className="bg-dark-900/80 border border-gold-900/40 rounded-3xl p-6 shadow-xl relative overflow-hidden">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Pending Payout</span>
               <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400">
@@ -70,7 +70,7 @@ export default function AdminBalancePage() {
             <p className="text-[11px] text-slate-400 mt-1">Awaiting order delivery fulfillment</p>
           </div>
 
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+          <div className="bg-dark-900/80 border border-gold-900/40 rounded-3xl p-6 shadow-xl relative overflow-hidden">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Settled Payouts</span>
               <div className="p-2 rounded-xl bg-blue-500/20 text-blue-400">
@@ -83,12 +83,12 @@ export default function AdminBalancePage() {
         </div>
 
         {/* Order-wise Revenue Breakdown Table */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl space-y-4 p-6">
+        <div className="bg-dark-900/80 border border-gold-900/40 rounded-3xl overflow-hidden shadow-2xl space-y-4 p-6">
           <h3 className="text-base font-black text-white">Order-wise Revenue View</h3>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-950 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-800">
+              <thead className="bg-dark-950 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-gold-900/40">
                 <tr>
                   <th className="p-3">Order ID</th>
                   <th className="p-3">Customer</th>
@@ -98,10 +98,10 @@ export default function AdminBalancePage() {
                   <th className="p-3">Date</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-gold-900/20/60">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="p-8 text-center text-emerald-400">
+                    <td colSpan={6} className="p-8 text-center text-gold-400">
                       <Loader2 className="w-6 h-6 animate-spin mx-auto" />
                     </td>
                   </tr>
@@ -113,8 +113,8 @@ export default function AdminBalancePage() {
                   </tr>
                 ) : (
                   records.map((rec) => (
-                    <tr key={rec._id} className="hover:bg-slate-800/40 transition-colors">
-                      <td className="p-3 font-mono font-bold text-emerald-400">
+                    <tr key={rec._id} className="hover:bg-dark-800/40 transition-colors">
+                      <td className="p-3 font-mono font-bold text-gold-400">
                         {rec.orderId?._id || rec.orderId || 'N/A'}
                       </td>
 
@@ -136,7 +136,7 @@ export default function AdminBalancePage() {
                         <span
                           className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${
                             rec.payoutStatus === 'Paid'
-                              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                              ? 'bg-gold-500/20 text-gold-300 border-gold-500/30'
                               : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
                           }`}
                         >
