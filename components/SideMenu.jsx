@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   X,
   Home,
@@ -33,10 +34,10 @@ export default function SideMenu({ isOpen, onClose }) {
         {/* Drawer Header */}
         <div className="p-5 border-b border-gold-900/40 flex items-center justify-between bg-dark-950">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gold-500 flex items-center justify-center font-bold text-dark-950">
-              M
+            <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0">
+              <Image src="/logo.png" alt="ROQAYYA" fill className="object-cover" />
             </div>
-            <span className="font-extrabold text-lg tracking-wider text-gold-400">MADANI PRODUCT</span>
+            <span className="font-extrabold text-lg tracking-wider text-gold-400">ROQAYYA</span>
           </div>
           <button
             onClick={onClose}
@@ -188,7 +189,7 @@ export default function SideMenu({ isOpen, onClose }) {
             </div>
           ) : (
             <p className="text-center text-slate-400">
-              Welcome to MADANI PRODUCT! Sign in to get exclusive offers.
+              Welcome to ROQAYYA! Sign in to get exclusive offers.
             </p>
           )}
         </div>
