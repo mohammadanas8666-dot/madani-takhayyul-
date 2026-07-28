@@ -53,22 +53,22 @@ export default function AuthModal({ isOpen, onClose }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-dark-950/80 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
       {/* Modal Box */}
-      <div className="relative w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 text-white z-10 animate-scaleUp">
+      <div className="relative w-full max-w-md bg-dark-900 border border-gold-900/40 rounded-2xl shadow-2xl p-6 text-white z-10 animate-scaleUp">
         
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+        <div className="flex items-center justify-between border-b border-gold-900/40 pb-4 mb-4">
           <h2 className="text-xl font-black text-white flex items-center gap-2">
-            {isSignUp ? <UserPlus className="w-5 h-5 text-emerald-400" /> : <LogIn className="w-5 h-5 text-emerald-400" />}
+            {isSignUp ? <UserPlus className="w-5 h-5 text-gold-400" /> : <LogIn className="w-5 h-5 text-gold-400" />}
             {isSignUp ? 'Create Account' : 'Welcome Back'}
           </h2>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-dark-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -96,7 +96,7 @@ export default function AuthModal({ isOpen, onClose }) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                className="w-full bg-dark-950 border border-gold-900/40 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500"
               />
             </div>
           </div>
@@ -113,7 +113,7 @@ export default function AuthModal({ isOpen, onClose }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                className="w-full bg-dark-950 border border-gold-900/40 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500"
               />
             </div>
           </div>
@@ -121,7 +121,7 @@ export default function AuthModal({ isOpen, onClose }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-extrabold text-sm shadow-lg transition-all disabled:opacity-50 mt-2"
+            className="w-full py-2.5 rounded-xl bg-gold-600 hover:bg-gold-500 text-dark-950 font-extrabold text-sm shadow-lg transition-all disabled:opacity-50 mt-2"
           >
             {loading ? 'Processing...' : isSignUp ? 'Sign Up' : 'Log In'}
           </button>
@@ -129,9 +129,9 @@ export default function AuthModal({ isOpen, onClose }) {
 
         <div className="relative my-6 text-center">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-800"></div>
+            <div className="w-full border-t border-gold-900/40"></div>
           </div>
-          <span className="relative bg-slate-900 px-3 text-xs text-slate-400 uppercase font-semibold">
+          <span className="relative bg-dark-900 px-3 text-xs text-slate-400 uppercase font-semibold">
             Or continue with
           </span>
         </div>
@@ -141,9 +141,9 @@ export default function AuthModal({ isOpen, onClose }) {
           type="button"
           onClick={handleGoogleSignIn}
           disabled={loading}
-          className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm border border-slate-700 shadow-md transition-all flex items-center justify-center gap-2"
+          className="w-full py-2.5 rounded-xl bg-dark-800 hover:bg-dark-800/70 text-white font-bold text-sm border border-gold-900/50 shadow-md transition-all flex items-center justify-center gap-2"
         >
-          <Chrome className="w-4 h-4 text-emerald-400" />
+          <Chrome className="w-4 h-4 text-gold-400" />
           <span>Sign in with Google</span>
         </button>
 
@@ -153,7 +153,7 @@ export default function AuthModal({ isOpen, onClose }) {
           <button
             type="button"
             onClick={() => setIsSignUp(!isSignUp)}
-            className="text-emerald-400 font-bold hover:underline ml-1"
+            className="text-gold-400 font-bold hover:underline ml-1"
           >
             {isSignUp ? 'Log In' : 'Sign Up'}
           </button>
