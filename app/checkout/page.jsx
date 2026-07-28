@@ -115,7 +115,7 @@ export default function CheckoutPage() {
         key: orderData.key,
         amount: orderData.amount,
         currency: orderData.currency,
-        name: 'MADANI Store',
+        name: 'MADANI PRODUCT',
         description: 'E-Commerce Order Payment',
         order_id: orderData.orderId,
         handler: async function (response) {
@@ -186,7 +186,7 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+    <div className="min-h-screen flex flex-col bg-dark-950 text-slate-100">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <Header />
 
@@ -195,12 +195,12 @@ export default function CheckoutPage() {
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={() => router.back()}
-            className="p-2 rounded-xl bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
+            className="p-2 rounded-xl bg-dark-900 text-slate-400 hover:text-white border border-gold-900/40"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <h1 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-3">
-            <CreditCard className="w-7 h-7 text-emerald-400" />
+            <CreditCard className="w-7 h-7 text-gold-400" />
             Checkout & Payment
           </h1>
         </div>
@@ -214,9 +214,9 @@ export default function CheckoutPage() {
         <form onSubmit={handlePayment} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* Shipping Details Form */}
-          <div className="lg:col-span-2 space-y-6 bg-slate-900/70 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl">
-            <h2 className="text-lg font-black text-white flex items-center gap-2 border-b border-slate-800 pb-4">
-              <MapPin className="w-5 h-5 text-emerald-400" />
+          <div className="lg:col-span-2 space-y-6 bg-dark-900/70 border border-gold-900/40 rounded-3xl p-6 sm:p-8 shadow-xl">
+            <h2 className="text-lg font-black text-white flex items-center gap-2 border-b border-gold-900/40 pb-4">
+              <MapPin className="w-5 h-5 text-gold-400" />
               Shipping Address
             </h2>
 
@@ -232,7 +232,7 @@ export default function CheckoutPage() {
                   value={address.fullName}
                   onChange={handleInputChange}
                   placeholder="John Doe"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-dark-950 border border-gold-900/40 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500"
                 />
               </div>
 
@@ -247,7 +247,7 @@ export default function CheckoutPage() {
                   value={address.email}
                   onChange={handleInputChange}
                   placeholder="john@example.com"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-dark-950 border border-gold-900/40 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500"
                 />
               </div>
 
@@ -262,7 +262,7 @@ export default function CheckoutPage() {
                   value={address.phone}
                   onChange={handleInputChange}
                   placeholder="+91 9876543210"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-dark-950 border border-gold-900/40 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500"
                 />
               </div>
 
@@ -277,7 +277,7 @@ export default function CheckoutPage() {
                   value={address.postalCode}
                   onChange={handleInputChange}
                   placeholder="110001"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-dark-950 border border-gold-900/40 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500"
                 />
               </div>
 
@@ -292,7 +292,7 @@ export default function CheckoutPage() {
                   value={address.street}
                   onChange={handleInputChange}
                   placeholder="House / Apartment No., Building Name, Street Name"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-dark-950 border border-gold-900/40 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500"
                 />
               </div>
 
@@ -307,7 +307,7 @@ export default function CheckoutPage() {
                   value={address.city}
                   onChange={handleInputChange}
                   placeholder="Mumbai"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-dark-950 border border-gold-900/40 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500"
                 />
               </div>
 
@@ -322,15 +322,15 @@ export default function CheckoutPage() {
                   value={address.state}
                   onChange={handleInputChange}
                   placeholder="Maharashtra"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-dark-950 border border-gold-900/40 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500"
                 />
               </div>
             </div>
           </div>
 
           {/* Payment Breakdown & Trigger */}
-          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 h-fit space-y-6 shadow-2xl">
-            <h2 className="text-lg font-black text-white border-b border-slate-800 pb-4">
+          <div className="bg-dark-900/90 border border-gold-900/40 rounded-3xl p-6 h-fit space-y-6 shadow-2xl">
+            <h2 className="text-lg font-black text-white border-b border-gold-900/40 pb-4">
               Payment Summary
             </h2>
 
@@ -346,26 +346,26 @@ export default function CheckoutPage() {
               ))}
             </div>
 
-            <div className="border-t border-slate-800 pt-4 space-y-2 text-sm">
+            <div className="border-t border-gold-900/40 pt-4 space-y-2 text-sm">
               <div className="flex justify-between text-slate-400">
                 <span>Items Subtotal</span>
                 <span className="text-white font-bold">₹{cartTotal}</span>
               </div>
               <div className="flex justify-between text-slate-400">
                 <span>Delivery Charge</span>
-                <span className="text-emerald-400 font-bold">{shippingFee === 0 ? 'FREE' : `₹${shippingFee}`}</span>
+                <span className="text-gold-400 font-bold">{shippingFee === 0 ? 'FREE' : `₹${shippingFee}`}</span>
               </div>
 
-              <div className="border-t border-slate-800 pt-3 flex justify-between text-base font-black text-white">
+              <div className="border-t border-gold-900/40 pt-3 flex justify-between text-base font-black text-white">
                 <span>Total Payable</span>
-                <span className="text-emerald-400 text-2xl">₹{grandTotal}</span>
+                <span className="text-gold-400 text-2xl">₹{grandTotal}</span>
               </div>
             </div>
 
             <button
               type="submit"
               disabled={loading || cart.length === 0}
-              className="w-full py-4 px-6 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-base flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/25 transition-all disabled:opacity-50"
+              className="w-full py-4 px-6 rounded-2xl bg-gold-500 hover:bg-gold-400 text-dark-950 font-black text-base flex items-center justify-center gap-2 shadow-xl shadow-gold-500/25 transition-all disabled:opacity-50"
             >
               {loading ? (
                 <>
