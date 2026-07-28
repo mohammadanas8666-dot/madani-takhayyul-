@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
-import Product from '@/models/Product';
+import Product, { PRODUCT_CATEGORIES } from '@/models/Product';
 
 export async function GET(request) {
   try {
@@ -52,11 +52,18 @@ export async function POST(request) {
   try {
     await connectToDatabase();
     const body = await request.json();
-    const { name, price, images, stock, category, isFeaturedInSlider, description } = body;
+    const { name, price, images, stock, category, color, size, fabric, isFeaturedInSlider, description } = body;
 
     if (!name || price === undefined || stock === undefined) {
       return NextResponse.json(
         { success: false, error: 'Name, price, and stock are required' },
+        { status: 400 }
+      );
+    }
+
+    if (!category || !PRODUCT_CATEGORIES.includes(category)) {
+      return NextResponse.json(
+        { success: false, error: `Category must be one of: ${PRODUCT_CATEGORIES.join(', ')}` },
         { status: 400 }
       );
     }
@@ -66,7 +73,10 @@ export async function POST(request) {
       price: Number(price),
       images: Array.isArray(images) ? images : [],
       stock: Number(stock),
-      category: category || 'General',
+      category,
+      color: color || '',
+      size: size || '',
+      fabric: fabric || '',
       isFeaturedInSlider: Boolean(isFeaturedInSlider),
       description: description || '',
     });
