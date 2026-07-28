@@ -19,11 +19,11 @@ export default function AdminNav() {
   if (loading) return null;
 
   return (
-    <div className="bg-slate-900 border-b border-slate-800 text-white sticky top-0 z-30 shadow-md">
+    <div className="bg-dark-900 border-b border-gold-900/40 text-white sticky top-0 z-30 shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Top title bar */}
-        <div className="flex items-center justify-between py-4 border-b border-slate-800/80">
+        <div className="flex items-center justify-between py-4 border-b border-gold-900/40/80">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
               <ShieldCheck className="w-5 h-5" />
@@ -40,7 +40,7 @@ export default function AdminNav() {
 
           <Link
             href="/"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold border border-slate-700 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-dark-800 hover:bg-dark-800/70 text-slate-300 hover:text-white text-xs font-semibold border border-gold-900/50 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" /> Storefront
           </Link>
@@ -52,8 +52,8 @@ export default function AdminNav() {
             href="/admin/products"
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
               pathname.startsWith('/admin/products')
-                ? 'bg-emerald-500 text-slate-950 shadow-md'
-                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                ? 'bg-gold-500 text-dark-950 shadow-md'
+                : 'text-slate-400 hover:bg-dark-800 hover:text-white'
             }`}
           >
             <Package className="w-4 h-4" />
@@ -64,8 +64,8 @@ export default function AdminNav() {
             href="/admin/orders"
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
               pathname.startsWith('/admin/orders')
-                ? 'bg-emerald-500 text-slate-950 shadow-md'
-                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                ? 'bg-gold-500 text-dark-950 shadow-md'
+                : 'text-slate-400 hover:bg-dark-800 hover:text-white'
             }`}
           >
             <ShoppingBag className="w-4 h-4" />
@@ -76,8 +76,8 @@ export default function AdminNav() {
             href="/admin/balance"
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
               pathname.startsWith('/admin/balance')
-                ? 'bg-emerald-500 text-slate-950 shadow-md'
-                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                ? 'bg-gold-500 text-dark-950 shadow-md'
+                : 'text-slate-400 hover:bg-dark-800 hover:text-white'
             }`}
           >
             <DollarSign className="w-4 h-4" />
@@ -88,8 +88,8 @@ export default function AdminNav() {
             href="/admin/users"
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
               pathname.startsWith('/admin/users')
-                ? 'bg-emerald-500 text-slate-950 shadow-md'
-                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                ? 'bg-gold-500 text-dark-950 shadow-md'
+                : 'text-slate-400 hover:bg-dark-800 hover:text-white'
             }`}
           >
             <Users className="w-4 h-4" />
