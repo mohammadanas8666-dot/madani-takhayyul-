@@ -94,7 +94,7 @@ export default function AdminOrdersPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-dark-950 text-slate-100 flex flex-col">
       <AdminNav />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -102,20 +102,20 @@ export default function AdminOrdersPage() {
         {/* Header Controls */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <ShoppingBag className="w-6 h-6 text-emerald-400" />
+            <ShoppingBag className="w-6 h-6 text-gold-400" />
             <h2 className="text-2xl font-black text-white">Order Management ({orders.length})</h2>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
             {/* Status Filter buttons */}
-            <div className="flex bg-slate-900 border border-slate-800 rounded-xl p-1">
+            <div className="flex bg-dark-900 border border-gold-900/40 rounded-xl p-1">
               {['All', ...ALLOWED_STATUSES].map((st) => (
                 <button
                   key={st}
                   onClick={() => setStatusFilter(st)}
                   className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                     statusFilter === st
-                      ? 'bg-emerald-500 text-slate-950 font-bold'
+                      ? 'bg-gold-500 text-dark-950 font-bold'
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
@@ -131,17 +131,17 @@ export default function AdminOrdersPage() {
                 placeholder="Search orders..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+                className="bg-dark-900 border border-gold-900/40 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-gold-500"
               />
             </div>
           </div>
         </div>
 
         {/* Orders Table */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+        <div className="bg-dark-900/80 border border-gold-900/40 rounded-3xl overflow-hidden shadow-2xl">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-950 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-slate-800">
+              <thead className="bg-dark-950 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-gold-900/40">
                 <tr>
                   <th className="p-4">Order ID & Date</th>
                   <th className="p-4">Customer</th>
@@ -151,10 +151,10 @@ export default function AdminOrdersPage() {
                   <th className="p-4 text-right">Update</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-gold-900/20/60">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="p-8 text-center text-emerald-400">
+                    <td colSpan={6} className="p-8 text-center text-gold-400">
                       <Loader2 className="w-6 h-6 animate-spin mx-auto" />
                     </td>
                   </tr>
@@ -166,9 +166,9 @@ export default function AdminOrdersPage() {
                   </tr>
                 ) : (
                   filteredOrders.map((order) => (
-                    <tr key={order._id} className="hover:bg-slate-800/40 transition-colors">
+                    <tr key={order._id} className="hover:bg-dark-800/40 transition-colors">
                       <td className="p-4">
-                        <span className="font-mono font-bold text-emerald-400 block text-xs">{order._id}</span>
+                        <span className="font-mono font-bold text-gold-400 block text-xs">{order._id}</span>
                         <span className="text-[10px] text-slate-500">
                           {new Date(order.createdAt).toLocaleString()}
                         </span>
@@ -187,12 +187,12 @@ export default function AdminOrdersPage() {
                         <span
                           className={`px-3 py-1 rounded-full text-[10px] font-extrabold border ${
                             order.status === 'Delivered'
-                              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                              ? 'bg-gold-500/20 text-gold-300 border-gold-500/40'
                               : order.status === 'Out for Delivery'
                               ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
                               : order.status === 'Shipped'
                               ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                              : 'bg-slate-800 text-slate-300 border-slate-700'
+                              : 'bg-dark-800 text-slate-300 border-gold-900/50'
                           }`}
                         >
                           {order.status}
@@ -206,7 +206,7 @@ export default function AdminOrdersPage() {
                       <td className="p-4 text-right">
                         <button
                           onClick={() => handleOpenEdit(order)}
-                          className="px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-slate-950 font-bold text-xs border border-emerald-500/30 transition-all flex items-center gap-1 ml-auto"
+                          className="px-3 py-1.5 rounded-xl bg-gold-600/20 hover:bg-gold-600 text-gold-400 hover:text-dark-950 font-bold text-xs border border-gold-500/30 transition-all flex items-center gap-1 ml-auto"
                         >
                           <Edit3 className="w-3.5 h-3.5" /> Edit Status
                         </button>
@@ -224,12 +224,12 @@ export default function AdminOrdersPage() {
       {/* Edit Order Modal */}
       {editingOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setEditingOrder(null)} />
+          <div className="fixed inset-0 bg-dark-950/80 backdrop-blur-sm" onClick={() => setEditingOrder(null)} />
 
-          <div className="relative w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 text-white z-10 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="relative w-full max-w-md bg-dark-900 border border-gold-900/40 rounded-3xl p-6 text-white z-10 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-gold-900/40 pb-3">
               <h3 className="text-base font-black flex items-center gap-2">
-                <Truck className="w-5 h-5 text-emerald-400" />
+                <Truck className="w-5 h-5 text-gold-400" />
                 Update Order Status
               </h3>
               <button onClick={() => setEditingOrder(null)} className="text-slate-400 hover:text-white text-xs">
@@ -237,7 +237,7 @@ export default function AdminOrdersPage() {
               </button>
             </div>
 
-            <div className="text-xs text-slate-400 space-y-1 bg-slate-950 p-3 rounded-xl border border-slate-800">
+            <div className="text-xs text-slate-400 space-y-1 bg-dark-950 p-3 rounded-xl border border-gold-900/40">
               <p>Order ID: <strong className="text-white font-mono">{editingOrder._id}</strong></p>
               <p>Customer: <strong className="text-white">{editingOrder.customerName}</strong></p>
             </div>
@@ -250,7 +250,7 @@ export default function AdminOrdersPage() {
                 <select
                   value={newStatus}
                   onChange={(e) => setNewStatus(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-dark-950 border border-gold-900/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold-500"
                 >
                   {ALLOWED_STATUSES.map((st) => (
                     <option key={st} value={st}>
@@ -269,22 +269,22 @@ export default function AdminOrdersPage() {
                   value={newTrackingId}
                   onChange={(e) => setNewTrackingId(e.target.value)}
                   placeholder="e.g. TRK-987654321"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-dark-950 border border-gold-900/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold-500"
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+              <div className="flex justify-end gap-3 pt-3 border-t border-gold-900/40">
                 <button
                   type="button"
                   onClick={() => setEditingOrder(null)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700"
+                  className="px-4 py-2 rounded-xl bg-dark-800 text-slate-300 text-xs font-semibold hover:bg-dark-800/70"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={updating}
-                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-extrabold text-xs shadow-lg"
+                  className="px-5 py-2 rounded-xl bg-gold-600 hover:bg-gold-500 text-dark-950 font-extrabold text-xs shadow-lg"
                 >
                   {updating ? 'Saving...' : 'Update Order'}
                 </button>
