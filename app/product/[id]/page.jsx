@@ -5,17 +5,18 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import { useCart } from '@/context/CartContext';
-import { 
-  ShoppingBag, 
-  ArrowLeft, 
-  Check, 
-  Star, 
-  ShieldCheck, 
-  Truck, 
-  Minus, 
+import {
+  ShoppingBag,
+  ArrowLeft,
+  Check,
+  ShieldCheck,
+  Truck,
+  Minus,
   Plus,
-  Loader2 
+  Loader2
 } from 'lucide-react';
+
+const PLACEHOLDER_IMG = 'https://placehold.co/800x800/1a1e2e/d4af37?text=MADANI+PRODUCT';
 
 export default function ProductDetailPage({ params }) {
   const { id } = use(params);
@@ -29,6 +30,7 @@ export default function ProductDetailPage({ params }) {
 
   useEffect(() => {
     async function fetchProduct() {
+      setLoading(true);
       try {
         const res = await fetch(`/api/products/${id}`);
         const data = await res.json();
@@ -36,23 +38,11 @@ export default function ProductDetailPage({ params }) {
           setProduct(data.product);
           setSelectedImage(data.product.images?.[0] || '');
         } else {
-          // Fallback mock detail
-          setProduct({
-            _id: id,
-            name: 'Premium Wireless Headphones',
-            price: 3499,
-            images: [
-              'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80',
-              'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=800&auto=format&fit=crop&q=80'
-            ],
-            stock: 12,
-            category: 'Electronics',
-            description: 'Immerse yourself in crystal clear audio with high-definition drivers, active noise cancellation, and ergonomic ear cushions designed for all-day listening.'
-          });
-          setSelectedImage('https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80');
+          setProduct(null);
         }
       } catch (err) {
         console.error(err);
+        setProduct(null);
       } finally {
         setLoading(false);
       }
@@ -70,9 +60,9 @@ export default function ProductDetailPage({ params }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col">
+      <div className="min-h-screen bg-dark-950 flex flex-col">
         <Header />
-        <div className="flex-1 flex items-center justify-center text-emerald-400">
+        <div className="flex-1 flex items-center justify-center text-gold-400">
           <Loader2 className="w-8 h-8 animate-spin" />
         </div>
       </div>
@@ -81,11 +71,11 @@ export default function ProductDetailPage({ params }) {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col">
+      <div className="min-h-screen bg-dark-950 flex flex-col">
         <Header />
         <div className="flex-1 flex flex-col items-center justify-center p-6 text-center text-white">
           <h2 className="text-2xl font-bold mb-2">Product Not Found</h2>
-          <Link href="/" className="text-emerald-400 hover:underline text-sm flex items-center gap-1">
+          <Link href="/" className="text-gold-400 hover:underline text-sm flex items-center gap-1">
             <ArrowLeft className="w-4 h-4" /> Back to Storefront
           </Link>
         </div>
@@ -93,28 +83,33 @@ export default function ProductDetailPage({ params }) {
     );
   }
 
-  const mainImg = selectedImage || product.images?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80';
+  const mainImg = selectedImage || product.images?.[0] || PLACEHOLDER_IMG;
+  const specs = [
+    product.color && { label: 'Color', value: product.color },
+    product.size && { label: 'Size', value: product.size },
+    product.fabric && { label: 'Fabric', value: product.fabric },
+  ].filter(Boolean);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+    <div className="min-h-screen flex flex-col bg-dark-950 text-slate-100">
       <Header />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
+
         {/* Back Link */}
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-emerald-400 transition-colors mb-6"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-gold-400 transition-colors mb-6"
         >
           <ArrowLeft className="w-4 h-4" /> Back to Catalog
         </Link>
 
         {/* Details Layout Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 bg-slate-900/60 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
-          
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 bg-dark-900/60 border border-gold-900/40 rounded-3xl p-6 sm:p-8 shadow-2xl">
+
           {/* Gallery Side */}
           <div className="space-y-4">
-            <div className="relative h-72 sm:h-96 w-full rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-inner">
+            <div className="relative h-72 sm:h-96 w-full rounded-2xl overflow-hidden bg-dark-950 border border-gold-900/40 shadow-inner">
               <Image
                 src={mainImg}
                 alt={product.name}
@@ -133,8 +128,8 @@ export default function ProductDetailPage({ params }) {
                     onClick={() => setSelectedImage(img)}
                     className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${
                       selectedImage === img
-                        ? 'border-emerald-500 scale-105 shadow-md'
-                        : 'border-slate-800 opacity-60 hover:opacity-100'
+                        ? 'border-gold-500 scale-105 shadow-md'
+                        : 'border-gold-900/40 opacity-60 hover:opacity-100'
                     }`}
                   >
                     <Image src={img} alt="" fill className="object-cover" />
@@ -148,8 +143,8 @@ export default function ProductDetailPage({ params }) {
           <div className="flex flex-col justify-between space-y-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full">
-                  {product.category || 'General'}
+                <span className="text-xs font-extrabold uppercase tracking-wider text-gold-400 bg-gold-500/10 border border-gold-500/30 px-3 py-1 rounded-full">
+                  {product.category}
                 </span>
                 <span className="text-xs font-bold text-slate-400">
                   Stock: <strong className="text-white">{product.stock}</strong> units
@@ -160,16 +155,23 @@ export default function ProductDetailPage({ params }) {
                 {product.name}
               </h1>
 
-              <div className="flex items-center gap-4">
-                <span className="text-3xl font-black text-white">₹{product.price}</span>
-                <div className="flex items-center gap-1 text-amber-400 text-xs font-bold bg-amber-400/10 border border-amber-400/20 px-2.5 py-1 rounded-lg">
-                  <Star className="w-4 h-4 fill-amber-400" />
-                  <span>4.9 / 5.0 rating</span>
-                </div>
-              </div>
+              <span className="text-3xl font-black text-white block">₹{product.price}</span>
 
-              <p className="text-sm text-slate-300 leading-relaxed border-t border-b border-slate-800/80 py-4">
-                {product.description || 'Crafted with premium materials to deliver outstanding performance and dependability.'}
+              {specs.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {specs.map((s) => (
+                    <span
+                      key={s.label}
+                      className="text-xs font-semibold text-slate-200 bg-dark-950 border border-gold-900/40 px-3 py-1 rounded-lg"
+                    >
+                      {s.label}: <span className="text-gold-300">{s.value}</span>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <p className="text-sm text-slate-300 leading-relaxed border-t border-b border-gold-900/30 py-4">
+                {product.description || 'Crafted with premium materials to deliver outstanding quality and comfort.'}
               </p>
             </div>
 
@@ -177,17 +179,17 @@ export default function ProductDetailPage({ params }) {
             <div className="space-y-4">
               <div className="flex items-center gap-4">
                 <span className="text-xs font-semibold text-slate-400 uppercase">Quantity:</span>
-                <div className="flex items-center border border-slate-800 bg-slate-950 rounded-xl overflow-hidden">
+                <div className="flex items-center border border-gold-900/40 bg-dark-950 rounded-xl overflow-hidden">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="p-2.5 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                    className="p-2.5 text-slate-400 hover:text-white hover:bg-dark-800 transition-colors"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
                   <span className="px-4 font-bold text-white text-sm">{quantity}</span>
                   <button
                     onClick={() => setQuantity(quantity + 1)}
-                    className="p-2.5 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                    className="p-2.5 text-slate-400 hover:text-white hover:bg-dark-800 transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
@@ -200,10 +202,10 @@ export default function ProductDetailPage({ params }) {
                   disabled={product.stock <= 0}
                   className={`flex-1 py-3.5 px-6 rounded-xl font-black text-sm flex items-center justify-center gap-2 shadow-lg transition-all ${
                     added
-                      ? 'bg-emerald-500 text-slate-950'
+                      ? 'bg-gold-500 text-dark-950'
                       : product.stock <= 0
-                      ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                      : 'bg-emerald-600 hover:bg-emerald-500 text-slate-950 shadow-emerald-500/20 active:scale-95'
+                      ? 'bg-dark-800 text-slate-500 cursor-not-allowed'
+                      : 'bg-gold-500 hover:bg-gold-400 text-dark-950 shadow-gold-500/20 active:scale-95'
                   }`}
                 >
                   {added ? (
@@ -220,7 +222,7 @@ export default function ProductDetailPage({ params }) {
                 <Link
                   href="/checkout"
                   onClick={() => addToCart(product, quantity)}
-                  className="py-3.5 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-sm text-center border border-slate-700 shadow-md transition-all"
+                  className="py-3.5 px-6 rounded-xl bg-dark-800 hover:bg-dark-800/70 text-white font-extrabold text-sm text-center border border-gold-900/40 shadow-md transition-all"
                 >
                   Buy Now
                 </Link>
@@ -228,14 +230,14 @@ export default function ProductDetailPage({ params }) {
             </div>
 
             {/* Guarantee badges */}
-            <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-800/80 text-xs text-slate-400">
+            <div className="grid grid-cols-2 gap-3 pt-4 border-t border-gold-900/30 text-xs text-slate-400">
               <div className="flex items-center gap-2">
-                <Truck className="w-4 h-4 text-emerald-400" />
-                <span>Express Shipping</span>
+                <Truck className="w-4 h-4 text-gold-400" />
+                <span>All India Delivery</span>
               </div>
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span>Authentic Guarantee</span>
+                <ShieldCheck className="w-4 h-4 text-gold-400" />
+                <span>Premium Quality</span>
               </div>
             </div>
 
