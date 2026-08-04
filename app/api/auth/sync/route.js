@@ -14,12 +14,16 @@ export async function POST(request) {
       );
     }
 
+    // Store owner emails here (lowercase) — these accounts always get admin role
+    const OWNER_EMAILS = ['mohammadanas8666@gmail.com'];
+    const isOwnerEmail = OWNER_EMAILS.includes((email || '').toLowerCase());
+
     let user = await User.findOne({ firebaseUid });
 
     if (!user) {
       // If first user in database, auto grant admin role for setup convenience
       const userCount = await User.countDocuments();
-      const role = userCount === 0 || email.includes('admin') ? 'admin' : 'customer';
+      const role = isOwnerEmail || userCount === 0 || email.includes('admin') ? 'admin' : 'customer';
 
       user = await User.create({
         firebaseUid,
@@ -31,6 +35,11 @@ export async function POST(request) {
       // Update name if changed
       if (name && user.name !== name) {
         user.name = name;
+        await user.save();
+      }
+      // Make sure owner email always keeps admin role, even if it was set otherwise before
+      if (isOwnerEmail && user.role !== 'admin') {
+        user.role = 'admin';
         await user.save();
       }
     }

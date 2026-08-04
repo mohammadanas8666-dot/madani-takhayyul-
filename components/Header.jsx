@@ -112,11 +112,11 @@ export default function Header({ onSearchChange, searchTerm = '' }) {
             {isAdmin && (
               <Link
                 href="/admin/products"
-                className="hidden lg:flex items-center gap-1 text-xs font-bold bg-gold-500/20 text-gold-300 border border-gold-500/40 px-2.5 py-1.5 rounded-lg hover:bg-gold-500/30 transition-colors"
+                className="flex items-center gap-1 text-xs font-bold bg-gold-500/20 text-gold-300 border border-gold-500/40 px-2 sm:px-2.5 py-1.5 rounded-lg hover:bg-gold-500/30 transition-colors"
                 id="admin-dashboard-link"
               >
                 <ShieldCheck className="w-4 h-4 text-gold-400" />
-                <span>Admin</span>
+                <span className="hidden sm:inline">Admin</span>
               </Link>
             )}
 
