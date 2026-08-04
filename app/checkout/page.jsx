@@ -1,17 +1,29 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
-import { CreditCard, ShieldCheck, MapPin, Truck, Loader2, ArrowLeft, CheckCircle2 } from 'lucide-react';
-import Script from 'next/script';
+import {
+  CreditCard,
+  ShieldCheck,
+  MapPin,
+  Loader2,
+  ArrowLeft,
+  MessageCircle,
+  Truck,
+  Clock,
+} from 'lucide-react';
+
+// Store WhatsApp number for order confirmations (with country code, no + or spaces)
+const WHATSAPP_NUMBER = '917860023820';
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, cartTotal, clearCart } = useCart();
   const { currentUser, dbUser } = useAuth();
+  const formRef = useRef(null);
 
   const [address, setAddress] = useState({
     fullName: '',
@@ -23,7 +35,7 @@ export default function CheckoutPage() {
     postalCode: '',
   });
 
-  const [loading, setLoading] = useState(false);
+  const [loadingAction, setLoadingAction] = useState(null); // 'whatsapp' | 'cod' | null
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -43,155 +55,134 @@ export default function CheckoutPage() {
     setAddress({ ...address, [e.target.name]: e.target.value });
   };
 
-  const handlePayment = async (e) => {
-    e.preventDefault();
-    setError('');
+  const buildOrderItems = () =>
+    cart.map((item) => ({
+      productId: item._id,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      image: item.images?.[0] || '',
+    }));
 
+  const buildShippingAddress = () => ({
+    fullName: address.fullName,
+    address: address.street,
+    city: address.city,
+    state: address.state,
+    postalCode: address.postalCode,
+    phone: address.phone,
+  });
+
+  const validateBeforeOrder = () => {
+    setError('');
     if (cart.length === 0) {
       setError('Your cart is empty. Please add products before checking out.');
-      return;
+      return false;
     }
+    if (formRef.current && !formRef.current.reportValidity()) {
+      return false;
+    }
+    return true;
+  };
 
-    setLoading(true);
+  // Create a Pending (unpaid, Cash on Delivery) order in the database
+  const handleCodOrder = async () => {
+    if (!validateBeforeOrder()) return;
+    setLoadingAction('cod');
+    setError('');
 
     try {
-      // 1. Create Razorpay order on server
-      const orderRes = await fetch('/api/razorpay/order', {
+      const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: grandTotal }),
+        body: JSON.stringify({
+          user: currentUser?.uid || 'guest',
+          customerName: address.fullName,
+          customerEmail: address.email,
+          items: buildOrderItems(),
+          totalAmount: grandTotal,
+          shippingAddress: buildShippingAddress(),
+          paymentId: 'COD',
+          paymentStatus: 'Pending',
+        }),
       });
-      const orderData = await orderRes.json();
+      const data = await res.json();
 
-      if (!orderData.success) {
-        throw new Error(orderData.error || 'Failed to initialize payment gateway');
+      if (data.success) {
+        clearCart();
+        router.push(`/track?orderId=${data.order._id}`);
+      } else {
+        throw new Error(data.error || 'Could not place your order. Please try again.');
       }
-
-      // If simulated order in dev mode without live Razorpay SDK keys
-      if (orderData.isMock || !window.Razorpay) {
-        const verifyRes = await fetch('/api/razorpay/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            razorpay_order_id: orderData.orderId,
-            razorpay_payment_id: `pay_simulated_${Date.now()}`,
-            razorpay_signature: 'simulated_signature',
-            isMock: true,
-            user: currentUser?.uid || 'guest',
-            customerName: address.fullName,
-            customerEmail: address.email,
-            items: cart.map(item => ({
-              productId: item._id,
-              name: item.name,
-              price: item.price,
-              quantity: item.quantity,
-              image: item.images?.[0] || '',
-            })),
-            totalAmount: grandTotal,
-            shippingAddress: {
-              fullName: address.fullName,
-              address: address.street,
-              city: address.city,
-              state: address.state,
-              postalCode: address.postalCode,
-              phone: address.phone,
-            },
-          }),
-        });
-
-        const verifyData = await verifyRes.json();
-
-        if (verifyData.success) {
-          clearCart();
-          router.push(`/track?orderId=${verifyData.order._id}`);
-          return;
-        } else {
-          throw new Error(verifyData.error || 'Order creation failed');
-        }
-      }
-
-      // Live Razorpay SDK execution
-      const options = {
-        key: orderData.key,
-        amount: orderData.amount,
-        currency: orderData.currency,
-        name: 'ROQAYYA',
-        description: 'E-Commerce Order Payment',
-        order_id: orderData.orderId,
-        handler: async function (response) {
-          try {
-            const verifyRes = await fetch('/api/razorpay/verify', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                isMock: false,
-                user: currentUser?.uid || 'guest',
-                customerName: address.fullName,
-                customerEmail: address.email,
-                items: cart.map(item => ({
-                  productId: item._id,
-                  name: item.name,
-                  price: item.price,
-                  quantity: item.quantity,
-                  image: item.images?.[0] || '',
-                })),
-                totalAmount: grandTotal,
-                shippingAddress: {
-                  fullName: address.fullName,
-                  address: address.street,
-                  city: address.city,
-                  state: address.state,
-                  postalCode: address.postalCode,
-                  phone: address.phone,
-                },
-              }),
-            });
-
-            const verifyData = await verifyRes.json();
-            if (verifyData.success) {
-              clearCart();
-              router.push(`/track?orderId=${verifyData.order._id}`);
-            } else {
-              setError(verifyData.error || 'Payment signature verification failed.');
-            }
-          } catch (err) {
-            console.error(err);
-            setError('Error confirming order payment server-side.');
-          } finally {
-            setLoading(false);
-          }
-        },
-        prefill: {
-          name: address.fullName,
-          email: address.email,
-          contact: address.phone,
-        },
-        theme: {
-          color: '#10b981',
-        },
-      };
-
-      const paymentObject = new window.Razorpay(options);
-      paymentObject.open();
-
     } catch (err) {
-      console.error('Payment error:', err);
-      setError(err.message || 'Payment initiation failed.');
+      console.error('COD order error:', err);
+      setError(err.message || 'Could not place your order. Please try again.');
     } finally {
-      setLoading(false);
+      setLoadingAction(null);
+    }
+  };
+
+  // Create a Pending order, then hand the customer off to WhatsApp with the order pre-filled
+  const handleWhatsAppOrder = async () => {
+    if (!validateBeforeOrder()) return;
+    setLoadingAction('whatsapp');
+    setError('');
+
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user: currentUser?.uid || 'guest',
+          customerName: address.fullName,
+          customerEmail: address.email,
+          items: buildOrderItems(),
+          totalAmount: grandTotal,
+          shippingAddress: buildShippingAddress(),
+          paymentId: 'WHATSAPP',
+          paymentStatus: 'Pending',
+        }),
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        throw new Error(data.error || 'Could not place your order. Please try again.');
+      }
+
+      const orderId = data.order._id;
+      const itemLines = cart
+        .map((item) => `• ${item.name} x ${item.quantity} — ₹${item.price * item.quantity}`)
+        .join('\n');
+
+      const message =
+        `Assalamu Alaikum, I would like to confirm my order on ROQAYYA.\n\n` +
+        `Order ID: ${orderId}\n\n` +
+        `${itemLines}\n\n` +
+        `Delivery Charge: ${shippingFee === 0 ? 'FREE' : `₹${shippingFee}`}\n` +
+        `Total: ₹${grandTotal}\n\n` +
+        `Name: ${address.fullName}\n` +
+        `Phone: ${address.phone}\n` +
+        `Address: ${address.street}, ${address.city}, ${address.state} - ${address.postalCode}`;
+
+      const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+
+      clearCart();
+      window.open(waUrl, '_blank');
+      router.push(`/track?orderId=${orderId}`);
+    } catch (err) {
+      console.error('WhatsApp order error:', err);
+      setError(err.message || 'Could not place your order. Please try again.');
+    } finally {
+      setLoadingAction(null);
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-dark-950 text-slate-100">
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <Header />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
+
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={() => router.back()}
@@ -211,8 +202,8 @@ export default function CheckoutPage() {
           </div>
         )}
 
-        <form onSubmit={handlePayment} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
+        <form ref={formRef} className="grid grid-cols-1 lg:grid-cols-3 gap-8" onSubmit={(e) => e.preventDefault()}>
+
           {/* Shipping Details Form */}
           <div className="lg:col-span-2 space-y-6 bg-dark-900/70 border border-gold-900/40 rounded-3xl p-6 sm:p-8 shadow-xl">
             <h2 className="text-lg font-black text-white flex items-center gap-2 border-b border-gold-900/40 pb-4">
@@ -328,7 +319,7 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Payment Breakdown & Trigger */}
+          {/* Payment Breakdown & Options */}
           <div className="bg-dark-900/90 border border-gold-900/40 rounded-3xl p-6 h-fit space-y-6 shadow-2xl">
             <h2 className="text-lg font-black text-white border-b border-gold-900/40 pb-4">
               Payment Summary
@@ -362,26 +353,61 @@ export default function CheckoutPage() {
               </div>
             </div>
 
+            {/* Online Payment — Coming Soon */}
+            <div className="w-full py-3.5 px-5 rounded-2xl bg-dark-800 border border-gold-900/40 flex items-center justify-between gap-2 opacity-70 cursor-not-allowed select-none">
+              <span className="flex items-center gap-2 text-sm font-bold text-slate-400">
+                <CreditCard className="w-4 h-4" />
+                Online Payment (UPI / Cards)
+              </span>
+              <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wide text-gold-400 bg-gold-500/10 border border-gold-500/30 px-2 py-1 rounded-full">
+                <Clock className="w-3 h-3" /> Coming Soon
+              </span>
+            </div>
+
+            {/* Continue with WhatsApp */}
             <button
-              type="submit"
-              disabled={loading || cart.length === 0}
-              className="w-full py-4 px-6 rounded-2xl bg-gold-500 hover:bg-gold-400 text-dark-950 font-black text-base flex items-center justify-center gap-2 shadow-xl shadow-gold-500/25 transition-all disabled:opacity-50"
+              type="button"
+              onClick={handleWhatsAppOrder}
+              disabled={loadingAction !== null || cart.length === 0}
+              className="w-full py-4 px-6 rounded-2xl bg-[#25D366] hover:bg-[#1ebe57] text-dark-950 font-black text-base flex items-center justify-center gap-2 shadow-xl shadow-[#25D366]/20 transition-all disabled:opacity-50"
             >
-              {loading ? (
+              {loadingAction === 'whatsapp' ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Securing Payment...
+                  Placing Order...
                 </>
               ) : (
                 <>
-                  <ShieldCheck className="w-5 h-5" /> Pay Now with Razorpay
+                  <MessageCircle className="w-5 h-5" /> Continue with WhatsApp
+                </>
+              )}
+            </button>
+
+            {/* Cash on Delivery */}
+            <button
+              type="button"
+              onClick={handleCodOrder}
+              disabled={loadingAction !== null || cart.length === 0}
+              className="w-full py-4 px-6 rounded-2xl bg-gold-500 hover:bg-gold-400 text-dark-950 font-black text-base flex items-center justify-center gap-2 shadow-xl shadow-gold-500/25 transition-all disabled:opacity-50"
+            >
+              {loadingAction === 'cod' ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Placing Order...
+                </>
+              ) : (
+                <>
+                  <Truck className="w-5 h-5" /> Cash on Delivery
                 </>
               )}
             </button>
 
             <div className="text-center text-slate-500 text-[11px] space-y-1">
-              <p>Supports UPI, Debit/Credit Cards, Net Banking & Wallets.</p>
-              <p>256-Bit SSL Encrypted & Verified.</p>
+              <p className="flex items-center justify-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5 text-gold-400" />
+                Your order details stay private & secure.
+              </p>
+              <p>Pay in cash when your order arrives at your doorstep.</p>
             </div>
           </div>
 
