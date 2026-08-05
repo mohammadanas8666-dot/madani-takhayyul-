@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import AdminNav from '@/components/AdminNav';
 import { 
   ShoppingBag, 
@@ -11,7 +12,10 @@ import {
   Clock, 
   MapPin, 
   Loader2, 
-  User 
+  User,
+  Eye,
+  FileText,
+  X
 } from 'lucide-react';
 
 const ALLOWED_STATUSES = ['Pending', 'Shipped', 'Out for Delivery', 'Delivered'];
@@ -21,6 +25,7 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [viewingOrder, setViewingOrder] = useState(null);
 
   // Tracking ID Edit Modal state
   const [editingOrder, setEditingOrder] = useState(null);
@@ -148,7 +153,7 @@ export default function AdminOrdersPage() {
                   <th className="p-4">Total Amount</th>
                   <th className="p-4">Fulfillment Status</th>
                   <th className="p-4">Tracking ID</th>
-                  <th className="p-4 text-right">Update</th>
+                  <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gold-900/20/60">
@@ -204,12 +209,29 @@ export default function AdminOrdersPage() {
                       </td>
 
                       <td className="p-4 text-right">
-                        <button
-                          onClick={() => handleOpenEdit(order)}
-                          className="px-3 py-1.5 rounded-xl bg-gold-600/20 hover:bg-gold-600 text-gold-400 hover:text-dark-950 font-bold text-xs border border-gold-500/30 transition-all flex items-center gap-1 ml-auto"
-                        >
-                          <Edit3 className="w-3.5 h-3.5" /> Edit Status
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => setViewingOrder(order)}
+                            title="View full order details"
+                            className="p-1.5 rounded-xl bg-dark-800 hover:bg-dark-800/70 text-slate-300 hover:text-white border border-gold-900/40 transition-all"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                          </button>
+                          <Link
+                            href={`/admin/orders/${order._id}/invoice`}
+                            target="_blank"
+                            title="Download / print bill"
+                            className="p-1.5 rounded-xl bg-dark-800 hover:bg-dark-800/70 text-slate-300 hover:text-white border border-gold-900/40 transition-all"
+                          >
+                            <FileText className="w-3.5 h-3.5" />
+                          </Link>
+                          <button
+                            onClick={() => handleOpenEdit(order)}
+                            className="px-3 py-1.5 rounded-xl bg-gold-600/20 hover:bg-gold-600 text-gold-400 hover:text-dark-950 font-bold text-xs border border-gold-500/30 transition-all flex items-center gap-1"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" /> Status
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -220,6 +242,81 @@ export default function AdminOrdersPage() {
         </div>
 
       </main>
+
+      {/* View Order Details Modal */}
+      {viewingOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-dark-950/80 backdrop-blur-sm" onClick={() => setViewingOrder(null)} />
+
+          <div className="relative w-full max-w-lg bg-dark-900 border border-gold-900/40 rounded-3xl p-6 text-white z-10 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-gold-900/40 pb-3">
+              <h3 className="text-base font-black flex items-center gap-2">
+                <User className="w-5 h-5 text-gold-400" />
+                Order Details
+              </h3>
+              <button onClick={() => setViewingOrder(null)} className="text-slate-400 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="text-xs text-slate-500 font-mono">{viewingOrder._id}</div>
+
+            {/* Customer */}
+            <div className="bg-dark-950 border border-gold-900/40 rounded-2xl p-4 space-y-1">
+              <h4 className="text-[10px] font-bold uppercase tracking-wider text-gold-400 mb-1">Customer</h4>
+              <p className="font-bold text-white">{viewingOrder.customerName}</p>
+              <p className="text-xs text-slate-400">{viewingOrder.customerEmail}</p>
+              {viewingOrder.shippingAddress?.phone && (
+                <p className="text-xs text-slate-400">{viewingOrder.shippingAddress.phone}</p>
+              )}
+            </div>
+
+            {/* Shipping Address */}
+            {viewingOrder.shippingAddress?.address && (
+              <div className="bg-dark-950 border border-gold-900/40 rounded-2xl p-4">
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-gold-400 mb-1 flex items-center gap-1">
+                  <MapPin className="w-3 h-3" /> Shipping Address
+                </h4>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  {viewingOrder.shippingAddress.address}, {viewingOrder.shippingAddress.city}, {viewingOrder.shippingAddress.state} - {viewingOrder.shippingAddress.postalCode}
+                </p>
+              </div>
+            )}
+
+            {/* Items */}
+            <div className="bg-dark-950 border border-gold-900/40 rounded-2xl p-4 space-y-2">
+              <h4 className="text-[10px] font-bold uppercase tracking-wider text-gold-400 mb-1">Items Ordered</h4>
+              {viewingOrder.items?.map((item, idx) => (
+                <div key={idx} className="flex justify-between text-xs">
+                  <span className="text-slate-300">{item.name} x {item.quantity}</span>
+                  <span className="font-bold text-white">₹{item.price * item.quantity}</span>
+                </div>
+              ))}
+              <div className="flex justify-between text-sm font-black text-gold-400 border-t border-gold-900/40 pt-2 mt-2">
+                <span>Total</span>
+                <span>₹{viewingOrder.totalAmount}</span>
+              </div>
+            </div>
+
+            {/* Payment */}
+            <div className="bg-dark-950 border border-gold-900/40 rounded-2xl p-4 text-xs text-slate-400 space-y-1">
+              <p>Payment Method: <span className="text-white font-semibold">
+                {viewingOrder.paymentId === 'COD' ? 'Cash on Delivery' : viewingOrder.paymentId === 'WHATSAPP' ? 'WhatsApp Order' : 'Online Payment'}
+              </span></p>
+              <p>Payment Status: <span className="text-white font-semibold">{viewingOrder.paymentStatus}</span></p>
+              <p>Fulfillment Status: <span className="text-white font-semibold">{viewingOrder.status}</span></p>
+            </div>
+
+            <Link
+              href={`/admin/orders/${viewingOrder._id}/invoice`}
+              target="_blank"
+              className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-gold-500 hover:bg-gold-400 text-dark-950 font-black text-sm shadow-lg"
+            >
+              <FileText className="w-4 h-4" /> Download / Print Bill
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Edit Order Modal */}
       {editingOrder && (
