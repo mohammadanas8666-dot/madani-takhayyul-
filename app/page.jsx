@@ -78,8 +78,10 @@ export default function HomePage() {
       {/* Main Content Area — kept minimal: auto-sliding featured strip + product grid only */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
 
-        {/* Auto-Sliding Featured Strip — starts sliding right automatically on load, owner-controlled via dashboard */}
-        <HeroSlider featuredProducts={featuredProducts} />
+        {/* Auto-Sliding Featured Strip — edge-to-edge width, starts sliding right automatically on load, owner-controlled via dashboard */}
+        <div className="-mx-4 sm:-mx-6 lg:-mx-8">
+          <HeroSlider featuredProducts={featuredProducts} />
+        </div>
 
         {/* Product Grid — 3 columns, infinite scroll, no category filters */}
         <ProductGrid
