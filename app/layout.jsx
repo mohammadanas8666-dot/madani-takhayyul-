@@ -11,7 +11,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="bg-dark-950 text-slate-100 antialiased min-h-screen flex flex-col">
+      <body className="bg-dark-950 text-slate-100 antialiased min-h-screen flex flex-col overflow-x-hidden">
         <AuthProvider>
           <CartProvider>
             {children}

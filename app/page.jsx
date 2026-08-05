@@ -68,7 +68,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-dark-950 text-slate-100">
+    <div className="min-h-screen flex flex-col bg-dark-950 text-slate-100 overflow-x-hidden">
       {/* Navigation Header */}
       <Header
         searchTerm={searchTerm}

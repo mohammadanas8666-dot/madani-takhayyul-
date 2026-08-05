@@ -73,13 +73,13 @@ export default function ProductCard({ product }) {
       </div>
 
       {/* Compact Content */}
-      <div className="p-1.5 sm:p-3 flex flex-col gap-0.5 sm:gap-1 flex-1">
-        <h3 className="text-[10px] sm:text-sm font-semibold text-white line-clamp-1 sm:line-clamp-2 group-hover:text-gold-300 transition-colors">
+      <div className="p-2.5 sm:p-4 flex flex-col gap-1 sm:gap-1.5 flex-1">
+        <h3 className="text-xs sm:text-base font-semibold text-white line-clamp-1 sm:line-clamp-2 group-hover:text-gold-300 transition-colors">
           {product.name}
         </h3>
 
         <div className="mt-auto flex items-center justify-between gap-1 pt-1">
-          <span className="text-[11px] sm:text-base font-black text-white">₹{product.price}</span>
+          <span className="text-sm sm:text-lg font-black text-white">₹{product.price}</span>
 
           <button
             onClick={(e) => {
@@ -88,14 +88,14 @@ export default function ProductCard({ product }) {
               if (!isOutOfStock) addToCart(product);
             }}
             disabled={isOutOfStock}
-            className={`p-1.5 sm:p-2 rounded-full transition-all shrink-0 ${
+            className={`p-2 sm:p-2.5 rounded-full transition-all shrink-0 ${
               isOutOfStock
                 ? 'bg-dark-800 text-slate-600 cursor-not-allowed'
                 : 'bg-gold-500 hover:bg-gold-400 text-dark-950 active:scale-90'
             }`}
             title={isOutOfStock ? 'Sold Out' : 'Add to Cart'}
           >
-            <ShoppingBag className="w-3 h-3 sm:w-4 sm:h-4" />
+            <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
       </div>
