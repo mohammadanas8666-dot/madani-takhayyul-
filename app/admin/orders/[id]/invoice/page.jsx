@@ -76,10 +76,10 @@ export default function OrderInvoicePage({ params }) {
         <div className="flex items-start justify-between border-b-2 border-slate-900 pb-6 mb-6">
           <div className="flex items-center gap-3">
             <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0">
-              <Image src="/logo.png" alt="ROQAYYA" fill className="object-cover" />
+              <Image src="/logo.png" alt="KAZRI" fill className="object-cover" />
             </div>
             <div>
-              <h1 className="text-2xl font-black tracking-tight">ROQAYYA</h1>
+              <h1 className="text-2xl font-black tracking-tight">KAZRI</h1>
               <p className="text-[11px] text-slate-500 font-medium">a Madni Takhayyul product</p>
               <p className="text-[11px] text-slate-500">Premium Islamic Wear</p>
             </div>
@@ -179,7 +179,7 @@ export default function OrderInvoicePage({ params }) {
         {/* Footer */}
         <div className="border-t border-slate-200 pt-6 text-center space-y-1">
           <p className="text-xs font-semibold text-slate-700 flex items-center justify-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-slate-400" /> Thank you for shopping with ROQAYYA.
+            <ShieldCheck className="w-4 h-4 text-slate-400" /> Thank you for shopping with KAZRI.
           </p>
           <p className="text-[10px] text-slate-400">This is a system-generated invoice and does not require a signature.</p>
         </div>

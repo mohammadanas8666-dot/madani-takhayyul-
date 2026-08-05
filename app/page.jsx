@@ -98,16 +98,16 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start gap-2">
             <div className="relative w-7 h-7 rounded-full overflow-hidden shrink-0">
-              <Image src="/logo.png" alt="ROQAYYA" fill className="object-cover" />
+              <Image src="/logo.png" alt="KAZRI" fill className="object-cover" />
             </div>
             <div className="flex flex-col leading-none text-left">
-              <span className="font-extrabold text-base text-white">ROQAYYA</span>
+              <span className="font-extrabold text-base text-white">KAZRI</span>
               <span className="text-[9px] text-slate-500">a madni takhayyul product</span>
             </div>
           </div>
 
           <div className="text-xs">
-            <p>© {new Date().getFullYear()} ROQAYYA. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} KAZRI. All rights reserved.</p>
           </div>
         </div>
       </footer>

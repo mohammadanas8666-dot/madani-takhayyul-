@@ -9,7 +9,7 @@ import { ShoppingBag, Trash2, ArrowRight, Minus, Plus, ArrowLeft } from 'lucide-
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity, clearCart, cartTotal } = useCart();
 
-  const shippingFee = cartTotal > 999 || cartTotal === 0 ? 0 : 99;
+  const shippingFee = 0; // Delivery is always free storewide
   const grandTotal = cartTotal + shippingFee;
 
   return (

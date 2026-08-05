@@ -17,7 +17,7 @@ import {
   Search,
 } from 'lucide-react';
 
-const PLACEHOLDER_IMG = 'https://placehold.co/200x200/1a1e2e/d4af37?text=ROQAYYA';
+const PLACEHOLDER_IMG = 'https://placehold.co/200x200/1a1e2e/d4af37?text=KAZRI';
 
 const EMPTY_FORM = {
   name: '',

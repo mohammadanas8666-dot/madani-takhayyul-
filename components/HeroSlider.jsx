@@ -4,7 +4,7 @@ import { useRef, useEffect, useCallback, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-const PLACEHOLDER_IMG = 'https://placehold.co/800x500/1a1e2e/d4af37?text=ROQAYYA';
+const PLACEHOLDER_IMG = 'https://placehold.co/800x500/1a1e2e/d4af37?text=KAZRI';
 const AUTO_SLIDE_INTERVAL = 3000; // ms between auto-advances
 const RESUME_DELAY = 3500; // ms of no user interaction before auto-slide resumes
 

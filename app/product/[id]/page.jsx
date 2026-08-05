@@ -19,7 +19,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 
-const PLACEHOLDER_IMG = 'https://placehold.co/800x800/1a1e2e/d4af37?text=ROQAYYA';
+const PLACEHOLDER_IMG = 'https://placehold.co/800x800/1a1e2e/d4af37?text=KAZRI';
 const SWIPE_THRESHOLD = 40; // px
 
 export default function ProductDetailPage({ params }) {
@@ -70,7 +70,7 @@ export default function ProductDetailPage({ params }) {
     const shareUrl = window.location.href;
     const shareData = {
       title: product.name,
-      text: `Check out ${product.name} — ₹${product.price} on ROQAYYA`,
+      text: `Check out ${product.name} — ₹${product.price} on KAZRI`,
       url: shareUrl,
     };
     try {

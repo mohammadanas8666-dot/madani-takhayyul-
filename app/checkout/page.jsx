@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 // Store WhatsApp number for order confirmations (with country code, no + or spaces)
-const WHATSAPP_NUMBER = '917860023820';
+const WHATSAPP_NUMBER = '917338152480';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -48,7 +48,7 @@ export default function CheckoutPage() {
     }
   }, [currentUser, dbUser]);
 
-  const shippingFee = cartTotal > 999 || cartTotal === 0 ? 0 : 99;
+  const shippingFee = 0; // Delivery is always free storewide
   const grandTotal = cartTotal + shippingFee;
 
   const handleInputChange = (e) => {
@@ -159,7 +159,7 @@ export default function CheckoutPage() {
         .join('\n\n');
 
       const message =
-        `Assalamu Alaikum, I would like to confirm my order on ROQAYYA.\n\n` +
+        `Assalamu Alaikum, I would like to confirm my order on KAZRI.\n\n` +
         `Order ID: ${orderId}\n\n` +
         `${itemLines}\n\n` +
         `Delivery Charge: ${shippingFee === 0 ? 'FREE' : `₹${shippingFee}`}\n` +

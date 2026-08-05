@@ -47,11 +47,11 @@ export default function Header({ onSearchChange, searchTerm = '' }) {
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-2 group">
               <div className="relative w-9 h-9 rounded-full overflow-hidden shadow-md shadow-gold-900/40 group-hover:scale-105 transition-transform shrink-0">
-                <Image src="/logo.png" alt="ROQAYYA" fill className="object-cover" />
+                <Image src="/logo.png" alt="KAZRI" fill className="object-cover" />
               </div>
               <div className="flex flex-col leading-none">
                 <span className="font-extrabold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-gold-200 to-gold-400">
-                  ROQAYYA
+                  KAZRI
                 </span>
                 <span className="text-[9px] text-slate-400 tracking-wide hidden sm:block">
                   a madni takhayyul product

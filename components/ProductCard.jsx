@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { ShoppingBag, Share2, Check } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 
-const PLACEHOLDER_IMG = 'https://placehold.co/600x600/1a1e2e/d4af37?text=ROQAYYA';
+const PLACEHOLDER_IMG = 'https://placehold.co/600x600/1a1e2e/d4af37?text=KAZRI';
 
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
@@ -21,7 +21,7 @@ export default function ProductCard({ product }) {
     const shareUrl = `${window.location.origin}/product/${product._id}`;
     const shareData = {
       title: product.name,
-      text: `Check out ${product.name} — ₹${product.price} on ROQAYYA`,
+      text: `Check out ${product.name} — ₹${product.price} on KAZRI`,
       url: shareUrl,
     };
 

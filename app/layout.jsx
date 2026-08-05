@@ -3,9 +3,9 @@ import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 
 export const metadata = {
-  title: 'ROQAYYA — Premium Islamic Wear',
+  title: 'KAZRI — Premium Islamic Wear',
   description: 'A Madni Takhayyul product. Shop premium Pagdi/Amama, Jubba, Kurta/Thobe, Rumal and more with fast shipping, secure Razorpay checkout, and live order tracking.',
-  keywords: 'roqayya, madni takhayyul, islamic wear, pagdi, amama, jubba, kurta, thobe, rumal, topi, islamic clothing',
+  keywords: 'kazri, madni takhayyul, islamic wear, pagdi, amama, jubba, kurta, thobe, rumal, topi, islamic clothing',
 };
 
 export default function RootLayout({ children }) {

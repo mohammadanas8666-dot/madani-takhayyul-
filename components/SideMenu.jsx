@@ -35,9 +35,9 @@ export default function SideMenu({ isOpen, onClose }) {
         <div className="p-5 border-b border-gold-900/40 flex items-center justify-between bg-dark-950">
           <div className="flex items-center gap-2">
             <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0">
-              <Image src="/logo.png" alt="ROQAYYA" fill className="object-cover" />
+              <Image src="/logo.png" alt="KAZRI" fill className="object-cover" />
             </div>
-            <span className="font-extrabold text-lg tracking-wider text-gold-400">ROQAYYA</span>
+            <span className="font-extrabold text-lg tracking-wider text-gold-400">KAZRI</span>
           </div>
           <button
             onClick={onClose}
@@ -189,7 +189,7 @@ export default function SideMenu({ isOpen, onClose }) {
             </div>
           ) : (
             <p className="text-center text-slate-400">
-              Welcome to ROQAYYA! Sign in to get exclusive offers.
+              Welcome to KAZRI! Sign in to get exclusive offers.
             </p>
           )}
         </div>
