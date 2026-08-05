@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, useRef, use } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Header from '@/components/Header';
@@ -13,18 +13,25 @@ import {
   Truck,
   Minus,
   Plus,
-  Loader2
+  Loader2,
+  Share2,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 const PLACEHOLDER_IMG = 'https://placehold.co/800x800/1a1e2e/d4af37?text=ROQAYYA';
+const SWIPE_THRESHOLD = 40; // px
 
 export default function ProductDetailPage({ params }) {
   const { id } = use(params);
   const [product, setProduct] = useState(null);
-  const [selectedImage, setSelectedImage] = useState('');
+  const [activeIndex, setActiveIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [added, setAdded] = useState(false);
+  const [shared, setShared] = useState(false);
+  const touchStartX = useRef(0);
+  const touchDeltaX = useRef(0);
 
   const { addToCart } = useCart();
 
@@ -36,7 +43,7 @@ export default function ProductDetailPage({ params }) {
         const data = await res.json();
         if (data.success && data.product) {
           setProduct(data.product);
-          setSelectedImage(data.product.images?.[0] || '');
+          setActiveIndex(0);
         } else {
           setProduct(null);
         }
@@ -55,6 +62,27 @@ export default function ProductDetailPage({ params }) {
       addToCart(product, quantity);
       setAdded(true);
       setTimeout(() => setAdded(false), 2000);
+    }
+  };
+
+  const handleShare = async () => {
+    if (!product) return;
+    const shareUrl = window.location.href;
+    const shareData = {
+      title: product.name,
+      text: `Check out ${product.name} — ₹${product.price} on ROQAYYA`,
+      url: shareUrl,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        setShared(true);
+        setTimeout(() => setShared(false), 1800);
+      }
+    } catch (err) {
+      // User cancelled the share sheet — ignore silently
     }
   };
 
@@ -83,12 +111,36 @@ export default function ProductDetailPage({ params }) {
     );
   }
 
-  const mainImg = selectedImage || product.images?.[0] || PLACEHOLDER_IMG;
+  const mainImg = product.images?.[activeIndex] || product.images?.[0] || PLACEHOLDER_IMG;
+  const imageCount = product.images?.length || 0;
   const specs = [
     product.color && { label: 'Color', value: product.color },
     product.size && { label: 'Size', value: product.size },
     product.fabric && { label: 'Fabric', value: product.fabric },
   ].filter(Boolean);
+
+  const goToImage = (idx) => {
+    if (imageCount === 0) return;
+    setActiveIndex((idx + imageCount) % imageCount);
+  };
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchDeltaX.current = 0;
+  };
+
+  const handleTouchMove = (e) => {
+    touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
+  };
+
+  const handleTouchEnd = () => {
+    if (touchDeltaX.current > SWIPE_THRESHOLD) {
+      goToImage(activeIndex - 1);
+    } else if (touchDeltaX.current < -SWIPE_THRESHOLD) {
+      goToImage(activeIndex + 1);
+    }
+    touchDeltaX.current = 0;
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-dark-950 text-slate-100">
@@ -96,20 +148,35 @@ export default function ProductDetailPage({ params }) {
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-        {/* Back Link */}
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-gold-400 transition-colors mb-6"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back to Catalog
-        </Link>
+        {/* Back Link + Share */}
+        <div className="flex items-center justify-between mb-6">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-gold-400 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Catalog
+          </Link>
+
+          <button
+            onClick={handleShare}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-gold-300 bg-dark-900 border border-gold-500/30 hover:bg-gold-500/10 px-3 py-1.5 rounded-full transition-colors"
+          >
+            {shared ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
+            {shared ? 'Link Copied' : 'Share'}
+          </button>
+        </div>
 
         {/* Details Layout Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 bg-dark-900/60 border border-gold-900/40 rounded-3xl p-6 sm:p-8 shadow-2xl">
 
           {/* Gallery Side */}
           <div className="space-y-4">
-            <div className="relative h-72 sm:h-96 w-full rounded-2xl overflow-hidden bg-dark-950 border border-gold-900/40 shadow-inner">
+            <div
+              className="relative h-72 sm:h-96 w-full rounded-2xl overflow-hidden bg-dark-950 border border-gold-900/40 shadow-inner select-none"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
               <Image
                 src={mainImg}
                 alt={product.name}
@@ -117,17 +184,48 @@ export default function ProductDetailPage({ params }) {
                 className="object-cover"
                 priority
               />
+
+              {imageCount > 1 && (
+                <>
+                  <button
+                    onClick={() => goToImage(activeIndex - 1)}
+                    aria-label="Previous image"
+                    className="hidden sm:flex items-center justify-center absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-dark-950/70 backdrop-blur-sm border border-gold-500/30 text-gold-300 hover:bg-gold-500/20 transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => goToImage(activeIndex + 1)}
+                    aria-label="Next image"
+                    className="hidden sm:flex items-center justify-center absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-dark-950/70 backdrop-blur-sm border border-gold-500/30 text-gold-300 hover:bg-gold-500/20 transition-colors"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+
+                  {/* Dot Indicators */}
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+                    {product.images.map((_, i) => (
+                      <span
+                        key={i}
+                        className={`h-1.5 rounded-full transition-all ${
+                          i === activeIndex ? 'w-5 bg-gold-400' : 'w-1.5 bg-white/40'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Thumbnail switcher */}
-            {product.images && product.images.length > 1 && (
+            {imageCount > 1 && (
               <div className="flex gap-3 overflow-x-auto pb-2">
                 {product.images.map((img, idx) => (
                   <button
                     key={idx}
-                    onClick={() => setSelectedImage(img)}
-                    className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${
-                      selectedImage === img
+                    onClick={() => setActiveIndex(idx)}
+                    className={`relative w-20 h-20 shrink-0 rounded-xl overflow-hidden border-2 transition-all ${
+                      activeIndex === idx
                         ? 'border-gold-500 scale-105 shadow-md'
                         : 'border-gold-900/40 opacity-60 hover:opacity-100'
                     }`}

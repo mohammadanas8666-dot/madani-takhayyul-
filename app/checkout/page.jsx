@@ -150,9 +150,13 @@ export default function CheckoutPage() {
       }
 
       const orderId = data.order._id;
+      const origin = window.location.origin;
       const itemLines = cart
-        .map((item) => `• ${item.name} x ${item.quantity} — ₹${item.price * item.quantity}`)
-        .join('\n');
+        .map(
+          (item) =>
+            `• ${item.name} x ${item.quantity} — ₹${item.price * item.quantity}\n  ${origin}/product/${item._id}`
+        )
+        .join('\n\n');
 
       const message =
         `Assalamu Alaikum, I would like to confirm my order on ROQAYYA.\n\n` +
@@ -353,54 +357,54 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Online Payment — Coming Soon */}
-            <div className="w-full py-3.5 px-5 rounded-2xl bg-dark-800 border border-gold-900/40 flex items-center justify-between gap-2 opacity-70 cursor-not-allowed select-none">
-              <span className="flex items-center gap-2 text-sm font-bold text-slate-400">
-                <CreditCard className="w-4 h-4" />
-                Online Payment (UPI / Cards)
-              </span>
-              <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wide text-gold-400 bg-gold-500/10 border border-gold-500/30 px-2 py-1 rounded-full">
-                <Clock className="w-3 h-3" /> Coming Soon
-              </span>
+            {/* Payment Options */}
+            <div className="space-y-3">
+              {/* Online Payment — Coming Soon (compact single line) */}
+              <div className="w-full py-2.5 px-4 rounded-xl bg-dark-800 border border-gold-900/40 flex items-center justify-between gap-2 opacity-70 cursor-not-allowed select-none">
+                <span className="flex items-center gap-1.5 text-xs font-bold text-slate-400">
+                  <CreditCard className="w-3.5 h-3.5" />
+                  UPI / Cards
+                </span>
+                <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wide text-gold-400 bg-gold-500/10 border border-gold-500/30 px-2 py-0.5 rounded-full">
+                  <Clock className="w-2.5 h-2.5" /> Soon
+                </span>
+              </div>
+
+              {/* WhatsApp + COD — side by side in one row */}
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={handleWhatsAppOrder}
+                  disabled={loadingAction !== null || cart.length === 0}
+                  className="py-3.5 px-3 rounded-xl bg-[#25D366] hover:bg-[#1ebe57] text-dark-950 font-black text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 shadow-lg shadow-[#25D366]/20 transition-all disabled:opacity-50"
+                >
+                  {loadingAction === 'whatsapp' ? (
+                    <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                  ) : (
+                    <>
+                      <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <span>WhatsApp</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleCodOrder}
+                  disabled={loadingAction !== null || cart.length === 0}
+                  className="py-3.5 px-3 rounded-xl bg-gold-500 hover:bg-gold-400 text-dark-950 font-black text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 shadow-lg shadow-gold-500/25 transition-all disabled:opacity-50"
+                >
+                  {loadingAction === 'cod' ? (
+                    <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                  ) : (
+                    <>
+                      <Truck className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <span>Cash on Delivery</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
-
-            {/* Continue with WhatsApp */}
-            <button
-              type="button"
-              onClick={handleWhatsAppOrder}
-              disabled={loadingAction !== null || cart.length === 0}
-              className="w-full py-4 px-6 rounded-2xl bg-[#25D366] hover:bg-[#1ebe57] text-dark-950 font-black text-base flex items-center justify-center gap-2 shadow-xl shadow-[#25D366]/20 transition-all disabled:opacity-50"
-            >
-              {loadingAction === 'whatsapp' ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Placing Order...
-                </>
-              ) : (
-                <>
-                  <MessageCircle className="w-5 h-5" /> Continue with WhatsApp
-                </>
-              )}
-            </button>
-
-            {/* Cash on Delivery */}
-            <button
-              type="button"
-              onClick={handleCodOrder}
-              disabled={loadingAction !== null || cart.length === 0}
-              className="w-full py-4 px-6 rounded-2xl bg-gold-500 hover:bg-gold-400 text-dark-950 font-black text-base flex items-center justify-center gap-2 shadow-xl shadow-gold-500/25 transition-all disabled:opacity-50"
-            >
-              {loadingAction === 'cod' ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Placing Order...
-                </>
-              ) : (
-                <>
-                  <Truck className="w-5 h-5" /> Cash on Delivery
-                </>
-              )}
-            </button>
 
             <div className="text-center text-slate-500 text-[11px] space-y-1">
               <p className="flex items-center justify-center gap-1">
