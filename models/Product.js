@@ -60,6 +60,11 @@ const ProductSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Indexes for fast filtering/sorting at scale
+ProductSchema.index({ category: 1, createdAt: -1 });
+ProductSchema.index({ isFeaturedInSlider: 1 });
+ProductSchema.index({ name: 'text' });
+
 export const PRODUCT_CATEGORIES = CATEGORIES;
 
 export default mongoose.models.Product || mongoose.model('Product', ProductSchema);

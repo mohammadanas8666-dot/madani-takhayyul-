@@ -1,14 +1,42 @@
 import { NextResponse } from 'next/server';
 import cloudinary from '@/lib/cloudinary';
+import { rateLimit, getClientIp } from '@/lib/rateLimit';
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
 
 export async function POST(request) {
   try {
+    // Uploads cost money (Cloudinary) — keep this tight: 15 uploads/min per IP
+    const ip = getClientIp(request);
+    const { allowed } = rateLimit(`upload:${ip}`, { limit: 15, windowMs: 60 * 1000 });
+    if (!allowed) {
+      return NextResponse.json(
+        { success: false, error: 'Too many uploads. Please slow down and try again shortly.' },
+        { status: 429 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get('file');
 
     if (!file) {
       return NextResponse.json(
         { success: false, error: 'No image file provided' },
+        { status: 400 }
+      );
+    }
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return NextResponse.json(
+        { success: false, error: 'Only JPEG, PNG, WEBP, or AVIF images are allowed' },
+        { status: 400 }
+      );
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { success: false, error: 'Image must be under 5MB' },
         { status: 400 }
       );
     }
