@@ -22,9 +22,6 @@ export async function GET(request) {
     }
 
     await connectToDatabase();
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-    const orderId = searchParams.get('orderId');
 
     const query = {};
     if (userId) {
