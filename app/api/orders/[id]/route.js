@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import Order from '@/models/Order';
 import Balance from '@/models/Balance';
+import { requireAdmin } from '@/lib/requireAdmin';
 
 export async function GET(request, { params }) {
   try {
@@ -28,6 +29,10 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   try {
+    // Only admins can update order status/tracking
+    const authError = await requireAdmin(request);
+    if (authError) return authError;
+
     await connectToDatabase();
     const { id } = await params;
     const body = await request.json();

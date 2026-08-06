@@ -2,9 +2,14 @@ import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import Balance from '@/models/Balance';
 import Order from '@/models/Order';
+import { requireAdmin } from '@/lib/requireAdmin';
 
-export async function GET() {
+export async function GET(request) {
   try {
+    // Revenue/balance data is admin-only
+    const authError = await requireAdmin(request);
+    if (authError) return authError;
+
     await connectToDatabase();
 
     const balanceRecords = await Balance.find().populate({

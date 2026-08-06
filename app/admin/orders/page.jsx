@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import AdminNav from '@/components/AdminNav';
+import { adminFetch } from '@/lib/adminFetch';
 import { 
   ShoppingBag, 
   Truck, 
@@ -36,7 +37,7 @@ export default function AdminOrdersPage() {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/orders');
+      const res = await adminFetch('/api/orders');
       const data = await res.json();
       if (data.success) {
         setOrders(data.orders || []);
@@ -64,7 +65,7 @@ export default function AdminOrdersPage() {
 
     setUpdating(true);
     try {
-      const res = await fetch(`/api/orders/${editingOrder._id}`, {
+      const res = await adminFetch(`/api/orders/${editingOrder._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

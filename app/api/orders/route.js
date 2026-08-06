@@ -4,9 +4,23 @@ import Order from '@/models/Order';
 import Balance from '@/models/Balance';
 import Product from '@/models/Product';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
+import { requireAdmin } from '@/lib/requireAdmin';
 
 export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+    const orderId = searchParams.get('orderId');
+
+    // Listing ALL orders (no filter) is admin-only — that's the full order
+    // book including every customer's contact details. Looking up by a
+    // specific userId or orderId (unguessable IDs) stays available for
+    // logged-in customers checking their own orders / guest tracking.
+    if (!userId && !orderId) {
+      const authError = await requireAdmin(request);
+      if (authError) return authError;
+    }
+
     await connectToDatabase();
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');

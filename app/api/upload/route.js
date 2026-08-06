@@ -1,12 +1,17 @@
 import { NextResponse } from 'next/server';
 import cloudinary from '@/lib/cloudinary';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
+import { requireAdmin } from '@/lib/requireAdmin';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
 
 export async function POST(request) {
   try {
+    // Only admins upload product images
+    const authError = await requireAdmin(request);
+    if (authError) return authError;
+
     // Uploads cost money (Cloudinary) — keep this tight: 15 uploads/min per IP
     const ip = getClientIp(request);
     const { allowed } = rateLimit(`upload:${ip}`, { limit: 15, windowMs: 60 * 1000 });
