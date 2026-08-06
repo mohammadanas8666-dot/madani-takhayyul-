@@ -27,6 +27,8 @@ export default function AdminOrdersPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [viewingOrder, setViewingOrder] = useState(null);
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ total: 0, pages: 1 });
 
   // Tracking ID Edit Modal state
   const [editingOrder, setEditingOrder] = useState(null);
@@ -34,13 +36,16 @@ export default function AdminOrdersPage() {
   const [newTrackingId, setNewTrackingId] = useState('');
   const [updating, setUpdating] = useState(false);
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (pageToFetch = 1) => {
     setLoading(true);
     try {
-      const res = await adminFetch('/api/orders');
+      const res = await adminFetch(`/api/orders?page=${pageToFetch}&limit=50`);
       const data = await res.json();
       if (data.success) {
         setOrders(data.orders || []);
+        if (data.pagination) {
+          setPagination({ total: data.pagination.total, pages: data.pagination.pages });
+        }
       }
     } catch (err) {
       console.error(err);
@@ -50,8 +55,8 @@ export default function AdminOrdersPage() {
   };
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    fetchOrders(page);
+  }, [page]);
 
   const handleOpenEdit = (order) => {
     setEditingOrder(order);
@@ -77,7 +82,7 @@ export default function AdminOrdersPage() {
       const data = await res.json();
       if (data.success) {
         setEditingOrder(null);
-        fetchOrders();
+        fetchOrders(page);
       } else {
         alert(data.error || 'Failed to update order');
       }
@@ -240,6 +245,30 @@ export default function AdminOrdersPage() {
               </tbody>
             </table>
           </div>
+
+          {pagination.pages > 1 && (
+            <div className="flex items-center justify-between px-4 py-4 border-t border-gold-900/30">
+              <span className="text-xs text-slate-400">
+                Page {page} of {pagination.pages} &middot; {pagination.total} orders total
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1 || loading}
+                  className="px-3 py-1.5 rounded-xl bg-dark-800 hover:bg-dark-800/70 text-slate-300 hover:text-white border border-gold-900/40 text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => setPage((p) => Math.min(pagination.pages, p + 1))}
+                  disabled={page >= pagination.pages || loading}
+                  className="px-3 py-1.5 rounded-xl bg-dark-800 hover:bg-dark-800/70 text-slate-300 hover:text-white border border-gold-900/40 text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
       </main>

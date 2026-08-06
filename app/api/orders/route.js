@@ -31,6 +31,30 @@ export async function GET(request) {
       query._id = orderId;
     }
 
+    // Only paginate the admin "list everything" view — customer/guest
+    // lookups (userId or orderId given) stay small and unpaginated.
+    if (!userId && !orderId) {
+      const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
+      const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20')));
+      const skip = (page - 1) * limit;
+
+      const [orders, total] = await Promise.all([
+        Order.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+        Order.countDocuments(query),
+      ]);
+
+      return NextResponse.json({
+        success: true,
+        orders,
+        pagination: {
+          total,
+          page,
+          limit,
+          pages: Math.ceil(total / limit),
+        },
+      });
+    }
+
     const orders = await Order.find(query).sort({ createdAt: -1 });
 
     return NextResponse.json({ success: true, orders });
