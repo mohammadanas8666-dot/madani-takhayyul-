@@ -179,11 +179,14 @@ export default function CheckoutPage() {
       const itemLines = cart
         .map((item) => {
           const productUrl = `${origin}/product/${item._id}`;
+          // Only include a real hosted image link — never a raw base64 data
+          // URL (that would dump megabytes of gibberish into the message).
           const imageUrl = item.images?.[0];
+          const safeImageUrl = imageUrl && imageUrl.startsWith('http') ? imageUrl : null;
           return (
             `• ${item.name} x ${item.quantity} — ₹${item.price * item.quantity}\n` +
             `  Product: ${productUrl}` +
-            (imageUrl ? `\n  Image: ${imageUrl}` : '')
+            (safeImageUrl ? `\n  Image: ${safeImageUrl}` : '')
           );
         })
         .join('\n\n');

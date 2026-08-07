@@ -50,22 +50,19 @@ export async function POST(request) {
     const apiKey = process.env.CLOUDINARY_API_KEY;
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
+    if (!cloudName || !apiKey || !apiSecret) {
+      console.error('Cloudinary env vars missing: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET');
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Image hosting is not configured. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in your environment variables.',
+        },
+        { status: 500 }
+      );
+    }
+
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-
-    // If Cloudinary keys are not fully present, fallback to base64 Data URL for easy dev mode
-    if (!cloudName || !apiKey || !apiSecret) {
-      const base64Data = buffer.toString('base64');
-      const mimeType = file.type || 'image/jpeg';
-      const dataUrl = `data:${mimeType};base64,${base64Data}`;
-
-      return NextResponse.json({
-        success: true,
-        url: dataUrl,
-        isDevFallback: true,
-        message: 'Using Data URL fallback. Provide CLOUDINARY_* keys in .env.local to enable Cloudinary hosted uploads.',
-      });
-    }
 
     // Upload to Cloudinary using upload stream
     const uploadResult = await new Promise((resolve, reject) => {
