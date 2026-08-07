@@ -5,6 +5,7 @@ import Balance from '@/models/Balance';
 import Product from '@/models/Product';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
 import { requireAdmin } from '@/lib/requireAdmin';
+import { requireUser } from '@/lib/requireUser';
 
 export async function GET(request) {
   try {
@@ -69,6 +70,11 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    // Ordering now requires a logged-in account — this also verifies WHO
+    // is ordering, so the "user" field can never be spoofed by the client.
+    const userAuth = await requireUser(request);
+    if (userAuth.error) return userAuth.error;
+
     // Prevent spam/fake order flooding: 10 orders/min per IP
     const ip = getClientIp(request);
     const { allowed } = rateLimit(`orders-create:${ip}`, { limit: 10, windowMs: 60 * 1000 });
@@ -81,11 +87,12 @@ export async function POST(request) {
 
     await connectToDatabase();
     const body = await request.json();
-    const { user, customerName, customerEmail, items, shippingAddress, paymentId, paymentStatus } = body;
+    const { customerName, customerEmail, items, shippingAddress, paymentId, paymentStatus } = body;
+    const user = userAuth.uid; // server-verified — never trust a client-supplied user id
 
-    if (!user || !items || !items.length) {
+    if (!items || !items.length) {
       return NextResponse.json(
-        { success: false, error: 'User and items are required' },
+        { success: false, error: 'Items are required' },
         { status: 400 }
       );
     }
@@ -132,7 +139,7 @@ export async function POST(request) {
     const order = await Order.create({
       user,
       customerName: customerName || 'Customer',
-      customerEmail: customerEmail || '',
+      customerEmail: customerEmail || userAuth.email || '',
       items: verifiedItems,
       totalAmount: verifiedTotal,
       shippingAddress: shippingAddress || {},
