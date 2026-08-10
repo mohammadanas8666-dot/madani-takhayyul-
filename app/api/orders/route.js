@@ -5,7 +5,7 @@ import Balance from '@/models/Balance';
 import Product from '@/models/Product';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
 import { requireAdmin } from '@/lib/requireAdmin';
-import { requireUser } from '@/lib/requireUser';
+import { optionalUser } from '@/lib/optionalUser';
 
 export async function GET(request) {
   try {
@@ -70,12 +70,13 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    // Ordering now requires a logged-in account — this also verifies WHO
-    // is ordering, so the "user" field can never be spoofed by the client.
-    const userAuth = await requireUser(request);
-    if (userAuth.error) return userAuth.error;
+    // Ordering does NOT require login — guests can check out directly.
+    // If the customer IS logged in, we still verify their token and link
+    // the order to their account (never trust a client-supplied user id).
+    const userAuth = await optionalUser(request);
 
-    // Prevent spam/fake order flooding: 10 orders/min per IP
+    // Prevent spam/fake order flooding: 10 orders/min per IP.
+    // This is the main abuse guard now that login isn't required.
     const ip = getClientIp(request);
     const { allowed } = rateLimit(`orders-create:${ip}`, { limit: 10, windowMs: 60 * 1000 });
     if (!allowed) {
@@ -88,7 +89,7 @@ export async function POST(request) {
     await connectToDatabase();
     const body = await request.json();
     const { customerName, customerEmail, items, shippingAddress, paymentId, paymentStatus } = body;
-    const user = userAuth.uid; // server-verified — never trust a client-supplied user id
+    const user = userAuth.uid || ''; // empty string for guest orders
 
     if (!items || !items.length) {
       return NextResponse.json(

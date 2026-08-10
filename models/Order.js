@@ -15,8 +15,8 @@ const OrderItemSchema = new mongoose.Schema({
 const OrderSchema = new mongoose.Schema(
   {
     user: {
-      type: String, // Firebase UID or User ObjectId
-      required: true,
+      type: String, // Firebase UID when logged in; empty string for guest orders
+      default: '',
     },
     customerName: String,
     customerEmail: String,
