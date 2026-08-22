@@ -1,24 +1,48 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Header from '@/components/Header';
 import HeroSlider from '@/components/HeroSlider';
 import ProductGrid from '@/components/ProductGrid';
 
 export default function HomePage() {
+  return (
+    <Suspense fallback={<HomePageFallback />}>
+      <HomePageContent />
+    </Suspense>
+  );
+}
+
+function HomePageFallback() {
+  return (
+    <div className="min-h-screen flex flex-col bg-dark-950 text-slate-100">
+      <div className="h-16 border-b border-gold-900/40 bg-dark-900/95" />
+    </div>
+  );
+}
+
+function HomePageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [products, setProducts] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  // Read the starting category straight from the URL (?category=...) so
+  // links from the side menu / bookmarks / shares land on the right filter.
+  const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get('category') || 'All');
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
 
-  const fetchProducts = async (search = searchTerm, pageNum = 1) => {
+  const fetchProducts = useCallback(async (category = selectedCategory, search = searchTerm, pageNum = 1) => {
     setLoading(true);
     try {
       let url = `/api/products?page=${pageNum}&limit=12`;
+      if (category && category !== 'All') url += `&category=${encodeURIComponent(category)}`;
       if (search) url += `&search=${encodeURIComponent(search)}`;
 
       const res = await fetch(url);
@@ -55,16 +79,25 @@ export default function HomePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCategory, searchTerm]);
 
   useEffect(() => {
-    fetchProducts(searchTerm, 1);
-  }, [searchTerm]);
+    setPage(1);
+    fetchProducts(selectedCategory, searchTerm, 1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCategory, searchTerm]);
+
+  // Keep the URL in sync with the selected category so it's shareable/bookmarkable
+  const handleCategoryChange = (cat) => {
+    setSelectedCategory(cat);
+    const url = cat === 'All' ? '/' : `/?category=${encodeURIComponent(cat)}`;
+    router.replace(url, { scroll: false });
+  };
 
   const handleLoadMore = () => {
     const nextPage = page + 1;
     setPage(nextPage);
-    fetchProducts(searchTerm, nextPage);
+    fetchProducts(selectedCategory, searchTerm, nextPage);
   };
 
   return (
@@ -75,7 +108,7 @@ export default function HomePage() {
         onSearchChange={(val) => setSearchTerm(val)}
       />
 
-      {/* Main Content Area — kept minimal: auto-sliding featured strip + product grid only */}
+      {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
 
         {/* Auto-Sliding Featured Strip — edge-to-edge width, starts sliding right automatically on load, owner-controlled via dashboard */}
@@ -83,10 +116,12 @@ export default function HomePage() {
           <HeroSlider featuredProducts={featuredProducts} />
         </div>
 
-        {/* Product Grid — 3 columns, infinite scroll, no category filters */}
+        {/* Category Filter + Product Grid — 2/4 column responsive, infinite scroll */}
         <ProductGrid
           products={products}
           totalCount={totalCount}
+          selectedCategory={selectedCategory}
+          onCategoryChange={handleCategoryChange}
           onLoadMore={handleLoadMore}
           hasMore={hasMore}
           loading={loading}
