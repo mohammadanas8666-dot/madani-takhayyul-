@@ -2,24 +2,44 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import AdminNav from '@/components/AdminNav';
 import { adminFetch } from '@/lib/adminFetch';
-import { 
-  ShoppingBag, 
-  Truck, 
-  Search, 
-  Edit3, 
-  Check, 
-  Clock, 
-  MapPin, 
-  Loader2, 
+import {
+  ShoppingBag,
+  Truck,
+  Search,
+  Edit3,
+  Clock,
+  MapPin,
+  Loader2,
   User,
   Eye,
   FileText,
-  X
+  X,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  Package,
+  Phone,
 } from 'lucide-react';
 
 const ALLOWED_STATUSES = ['Pending', 'Shipped', 'Out for Delivery', 'Delivered'];
+const PLACEHOLDER_IMG = 'https://placehold.co/200x200/1a1e2e/d4af37?text=KAZRI';
+
+// Exact date + time (down to the second) for "which product sold when"
+const formatExactDateTime = (dateStr) => {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  });
+};
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -35,6 +55,13 @@ export default function AdminOrdersPage() {
   const [newStatus, setNewStatus] = useState('');
   const [newTrackingId, setNewTrackingId] = useState('');
   const [updating, setUpdating] = useState(false);
+
+  // Product gallery (slideshow) popup state — shows every item sold in an order
+  const [galleryOrder, setGalleryOrder] = useState(null);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+
+  // Delete state
+  const [deletingId, setDeletingId] = useState(null);
 
   const fetchOrders = async (pageToFetch = 1) => {
     setLoading(true);
@@ -94,22 +121,70 @@ export default function AdminOrdersPage() {
     }
   };
 
+  const handleDeleteOrder = async (order) => {
+    const confirmed = confirm(
+      `Delete this order permanently?\n\nOrder: ${order._id}\nCustomer: ${order.customerName}\n\nThis cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    setDeletingId(order._id);
+    try {
+      const res = await adminFetch(`/api/orders/${order._id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        setOrders((prev) => prev.filter((o) => o._id !== order._id));
+        if (viewingOrder?._id === order._id) setViewingOrder(null);
+        if (galleryOrder?._id === order._id) setGalleryOrder(null);
+      } else {
+        alert(data.error || 'Failed to delete order');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error deleting order');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const openGallery = (order) => {
+    setGalleryOrder(order);
+    setGalleryIndex(0);
+  };
+
+  const closeGallery = () => {
+    setGalleryOrder(null);
+    setGalleryIndex(0);
+  };
+
+  const nextSlide = () => {
+    if (!galleryOrder) return;
+    setGalleryIndex((i) => (i + 1) % galleryOrder.items.length);
+  };
+
+  const prevSlide = () => {
+    if (!galleryOrder) return;
+    setGalleryIndex((i) => (i - 1 + galleryOrder.items.length) % galleryOrder.items.length);
+  };
+
   const filteredOrders = orders.filter((o) => {
     const matchSearch =
       o._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       o.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       o.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      o.shippingAddress?.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       o.trackingId?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchStatus = statusFilter === 'All' || o.status === statusFilter;
     return matchSearch && matchStatus;
   });
+
+  const currentGalleryItem = galleryOrder?.items?.[galleryIndex];
 
   return (
     <div className="min-h-screen bg-dark-950 text-slate-100 flex flex-col">
       <AdminNav />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        
+
         {/* Header Controls */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -154,6 +229,7 @@ export default function AdminOrdersPage() {
             <table className="w-full text-left text-xs text-slate-300">
               <thead className="bg-dark-950 text-slate-400 uppercase font-bold text-[10px] tracking-wider border-b border-gold-900/40">
                 <tr>
+                  <th className="p-4">Product</th>
                   <th className="p-4">Order ID & Date</th>
                   <th className="p-4">Customer</th>
                   <th className="p-4">Total Amount</th>
@@ -162,85 +238,131 @@ export default function AdminOrdersPage() {
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gold-900/20/60">
+              <tbody className="divide-y divide-gold-900/20">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="p-8 text-center text-gold-400">
+                    <td colSpan={7} className="p-8 text-center text-gold-400">
                       <Loader2 className="w-6 h-6 animate-spin mx-auto" />
                     </td>
                   </tr>
                 ) : filteredOrders.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="p-8 text-center text-slate-500">
+                    <td colSpan={7} className="p-8 text-center text-slate-500">
                       No orders matching current filter.
                     </td>
                   </tr>
                 ) : (
-                  filteredOrders.map((order) => (
-                    <tr key={order._id} className="hover:bg-dark-800/40 transition-colors">
-                      <td className="p-4">
-                        <span className="font-mono font-bold text-gold-400 block text-xs">{order._id}</span>
-                        <span className="text-[10px] text-slate-500">
-                          {new Date(order.createdAt).toLocaleString()}
-                        </span>
-                      </td>
+                  filteredOrders.map((order) => {
+                    const firstItem = order.items?.[0];
+                    const extraCount = (order.items?.length || 0) - 1;
 
-                      <td className="p-4">
-                        <span className="font-bold text-white block">{order.customerName}</span>
-                        <span className="text-[10px] text-slate-400 block">{order.customerEmail}</span>
-                      </td>
-
-                      <td className="p-4 font-black text-white text-sm">
-                        ₹{order.totalAmount}
-                      </td>
-
-                      <td className="p-4">
-                        <span
-                          className={`px-3 py-1 rounded-full text-[10px] font-extrabold border ${
-                            order.status === 'Delivered'
-                              ? 'bg-gold-500/20 text-gold-300 border-gold-500/40'
-                              : order.status === 'Out for Delivery'
-                              ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
-                              : order.status === 'Shipped'
-                              ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                              : 'bg-dark-800 text-slate-300 border-gold-900/50'
-                          }`}
-                        >
-                          {order.status}
-                        </span>
-                      </td>
-
-                      <td className="p-4 font-mono text-slate-300">
-                        {order.trackingId || <span className="text-slate-600 text-[11px]">Unassigned</span>}
-                      </td>
-
-                      <td className="p-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                    return (
+                      <tr key={order._id} className="hover:bg-dark-800/40 transition-colors">
+                        {/* Product DP-style thumbnail — click opens the full slideshow */}
+                        <td className="p-4">
                           <button
-                            onClick={() => setViewingOrder(order)}
-                            title="View full order details"
-                            className="p-1.5 rounded-xl bg-dark-800 hover:bg-dark-800/70 text-slate-300 hover:text-white border border-gold-900/40 transition-all"
+                            onClick={() => openGallery(order)}
+                            title="View products sold in this order"
+                            className="relative w-11 h-11 rounded-full overflow-hidden border-2 border-gold-900/50 hover:border-gold-500 transition-all shrink-0"
                           >
-                            <Eye className="w-3.5 h-3.5" />
+                            <Image
+                              src={firstItem?.image || PLACEHOLDER_IMG}
+                              alt=""
+                              fill
+                              unoptimized
+                              className="object-cover"
+                            />
+                            {extraCount > 0 && (
+                              <span className="absolute bottom-0 right-0 bg-gold-500 text-dark-950 text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center border border-dark-950">
+                                +{extraCount}
+                              </span>
+                            )}
                           </button>
-                          <Link
-                            href={`/admin/orders/${order._id}/invoice`}
-                            target="_blank"
-                            title="Download / print bill"
-                            className="p-1.5 rounded-xl bg-dark-800 hover:bg-dark-800/70 text-slate-300 hover:text-white border border-gold-900/40 transition-all"
+                        </td>
+
+                        <td className="p-4 whitespace-nowrap">
+                          <span className="font-mono font-bold text-gold-400 block text-xs">{order._id}</span>
+                          <span className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5">
+                            <Clock className="w-2.5 h-2.5" />
+                            {formatExactDateTime(order.createdAt)}
+                          </span>
+                        </td>
+
+                        <td className="p-4 whitespace-nowrap">
+                          <span className="font-bold text-white block">{order.customerName}</span>
+                          <span className="text-[10px] text-slate-400 block">{order.customerEmail}</span>
+                          {order.shippingAddress?.phone && (
+                            <span className="text-[10px] text-gold-400/90 flex items-center gap-1 mt-0.5">
+                              <Phone className="w-2.5 h-2.5" />
+                              {order.shippingAddress.phone}
+                            </span>
+                          )}
+                        </td>
+
+                        <td className="p-4 font-black text-white text-sm whitespace-nowrap">
+                          ₹{order.totalAmount}
+                        </td>
+
+                        <td className="p-4 whitespace-nowrap">
+                          <span
+                            className={`px-3 py-1 rounded-full text-[10px] font-extrabold border ${
+                              order.status === 'Delivered'
+                                ? 'bg-gold-500/20 text-gold-300 border-gold-500/40'
+                                : order.status === 'Out for Delivery'
+                                ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+                                : order.status === 'Shipped'
+                                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                                : 'bg-dark-800 text-slate-300 border-gold-900/50'
+                            }`}
                           >
-                            <FileText className="w-3.5 h-3.5" />
-                          </Link>
-                          <button
-                            onClick={() => handleOpenEdit(order)}
-                            className="px-3 py-1.5 rounded-xl bg-gold-600/20 hover:bg-gold-600 text-gold-400 hover:text-dark-950 font-bold text-xs border border-gold-500/30 transition-all flex items-center gap-1"
-                          >
-                            <Edit3 className="w-3.5 h-3.5" /> Status
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                            {order.status}
+                          </span>
+                        </td>
+
+                        <td className="p-4 font-mono text-slate-300 whitespace-nowrap">
+                          {order.trackingId || <span className="text-slate-600 text-[11px]">Unassigned</span>}
+                        </td>
+
+                        <td className="p-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => setViewingOrder(order)}
+                              title="View full order details"
+                              className="p-1.5 rounded-xl bg-dark-800 hover:bg-dark-800/70 text-slate-300 hover:text-white border border-gold-900/40 transition-all"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </button>
+                            <Link
+                              href={`/admin/orders/${order._id}/invoice`}
+                              target="_blank"
+                              title="Download / print bill"
+                              className="p-1.5 rounded-xl bg-dark-800 hover:bg-dark-800/70 text-slate-300 hover:text-white border border-gold-900/40 transition-all"
+                            >
+                              <FileText className="w-3.5 h-3.5" />
+                            </Link>
+                            <button
+                              onClick={() => handleOpenEdit(order)}
+                              className="px-3 py-1.5 rounded-xl bg-gold-600/20 hover:bg-gold-600 text-gold-400 hover:text-dark-950 font-bold text-xs border border-gold-500/30 transition-all flex items-center gap-1"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" /> Status
+                            </button>
+                            <button
+                              onClick={() => handleDeleteOrder(order)}
+                              disabled={deletingId === order._id}
+                              title="Delete this order"
+                              className="p-1.5 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/30 transition-all disabled:opacity-50"
+                            >
+                              {deletingId === order._id ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -273,6 +395,88 @@ export default function AdminOrdersPage() {
 
       </main>
 
+      {/* Product Gallery Slideshow Popup — every item sold in this order */}
+      {galleryOrder && currentGalleryItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-dark-950/90 backdrop-blur-sm" onClick={closeGallery} />
+
+          <div className="relative w-full max-w-sm bg-dark-900 border border-gold-900/40 rounded-3xl p-5 text-white z-10 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-gold-900/40 pb-3">
+              <h3 className="text-sm font-black flex items-center gap-2">
+                <Package className="w-4 h-4 text-gold-400" />
+                Products Sold {galleryOrder.items.length > 1 && `(${galleryIndex + 1}/${galleryOrder.items.length})`}
+              </h3>
+              <button onClick={closeGallery} className="text-slate-400 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Slide image with left/right navigation */}
+            <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-dark-950 border border-gold-900/40">
+              <Image
+                src={currentGalleryItem.image || PLACEHOLDER_IMG}
+                alt={currentGalleryItem.name}
+                fill
+                unoptimized
+                className="object-cover"
+              />
+
+              {galleryOrder.items.length > 1 && (
+                <>
+                  <button
+                    onClick={prevSlide}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-dark-950/80 text-white hover:bg-gold-500 hover:text-dark-950 transition-colors border border-gold-900/50"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={nextSlide}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-dark-950/80 text-white hover:bg-gold-500 hover:text-dark-950 transition-colors border border-gold-900/50"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Dot indicators */}
+            {galleryOrder.items.length > 1 && (
+              <div className="flex justify-center gap-1.5">
+                {galleryOrder.items.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setGalleryIndex(i)}
+                    className={`h-1.5 rounded-full transition-all ${
+                      i === galleryIndex ? 'bg-gold-400 w-5' : 'bg-dark-700 w-1.5'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Product Info */}
+            <div className="text-center">
+              <h4 className="font-bold text-white text-sm">{currentGalleryItem.name}</h4>
+              <p className="text-gold-400 font-black text-base mt-0.5">
+                ₹{currentGalleryItem.price} <span className="text-slate-400 font-normal text-xs">x {currentGalleryItem.quantity}</span>
+              </p>
+            </div>
+
+            {/* Sale metadata — exact date, time, customer */}
+            <div className="bg-dark-950 border border-gold-900/40 rounded-xl p-3 text-xs text-slate-400 space-y-1.5">
+              <p className="flex items-center gap-1.5">
+                <User className="w-3 h-3 text-gold-400" />
+                Sold to: <span className="text-white font-semibold">{galleryOrder.customerName}</span>
+              </p>
+              <p className="flex items-center gap-1.5">
+                <Clock className="w-3 h-3 text-gold-400" />
+                Exact Date & Time: <span className="text-white font-semibold">{formatExactDateTime(galleryOrder.createdAt)}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* View Order Details Modal */}
       {viewingOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -290,6 +494,10 @@ export default function AdminOrdersPage() {
             </div>
 
             <div className="text-xs text-slate-500 font-mono">{viewingOrder._id}</div>
+            <div className="text-xs text-slate-400 flex items-center gap-1.5">
+              <Clock className="w-3 h-3 text-gold-400" />
+              {formatExactDateTime(viewingOrder.createdAt)}
+            </div>
 
             {/* Customer */}
             <div className="bg-dark-950 border border-gold-900/40 rounded-2xl p-4 space-y-1">
@@ -297,7 +505,10 @@ export default function AdminOrdersPage() {
               <p className="font-bold text-white">{viewingOrder.customerName}</p>
               <p className="text-xs text-slate-400">{viewingOrder.customerEmail}</p>
               {viewingOrder.shippingAddress?.phone && (
-                <p className="text-xs text-slate-400">{viewingOrder.shippingAddress.phone}</p>
+                <p className="text-xs text-slate-400 flex items-center gap-1.5">
+                  <Phone className="w-3 h-3 text-gold-400" />
+                  {viewingOrder.shippingAddress.phone}
+                </p>
               )}
             </div>
 
@@ -315,10 +526,21 @@ export default function AdminOrdersPage() {
 
             {/* Items */}
             <div className="bg-dark-950 border border-gold-900/40 rounded-2xl p-4 space-y-2">
-              <h4 className="text-[10px] font-bold uppercase tracking-wider text-gold-400 mb-1">Items Ordered</h4>
+              <div className="flex items-center justify-between mb-1">
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-gold-400">Items Ordered</h4>
+                <button
+                  onClick={() => openGallery(viewingOrder)}
+                  className="text-[10px] font-bold text-gold-400 hover:text-gold-300 underline"
+                >
+                  View Photos
+                </button>
+              </div>
               {viewingOrder.items?.map((item, idx) => (
-                <div key={idx} className="flex justify-between text-xs">
-                  <span className="text-slate-300">{item.name} x {item.quantity}</span>
+                <div key={idx} className="flex items-center gap-2 text-xs">
+                  <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-gold-900/40 shrink-0 bg-dark-900">
+                    <Image src={item.image || PLACEHOLDER_IMG} alt="" fill unoptimized className="object-cover" />
+                  </div>
+                  <span className="text-slate-300 flex-1">{item.name} x {item.quantity}</span>
                   <span className="font-bold text-white">₹{item.price * item.quantity}</span>
                 </div>
               ))}
@@ -337,13 +559,26 @@ export default function AdminOrdersPage() {
               <p>Fulfillment Status: <span className="text-white font-semibold">{viewingOrder.status}</span></p>
             </div>
 
-            <Link
-              href={`/admin/orders/${viewingOrder._id}/invoice`}
-              target="_blank"
-              className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-gold-500 hover:bg-gold-400 text-dark-950 font-black text-sm shadow-lg"
-            >
-              <FileText className="w-4 h-4" /> Download / Print Bill
-            </Link>
+            <div className="flex gap-3">
+              <Link
+                href={`/admin/orders/${viewingOrder._id}/invoice`}
+                target="_blank"
+                className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-gold-500 hover:bg-gold-400 text-dark-950 font-black text-sm shadow-lg"
+              >
+                <FileText className="w-4 h-4" /> Download / Print Bill
+              </Link>
+              <button
+                onClick={() => handleDeleteOrder(viewingOrder)}
+                disabled={deletingId === viewingOrder._id}
+                className="px-4 py-3 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/30 font-bold text-sm transition-all disabled:opacity-50"
+              >
+                {deletingId === viewingOrder._id ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}
