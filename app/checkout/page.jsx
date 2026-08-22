@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 
 // Store WhatsApp number for order confirmations (with country code, no + or spaces)
-const WHATSAPP_NUMBER = '919942852480';
+const WHATSAPP_NUMBER = '9170912 68813';
 
 export default function CheckoutPage() {
   const router = useRouter();
