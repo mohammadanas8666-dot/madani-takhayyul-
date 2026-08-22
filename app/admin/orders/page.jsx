@@ -414,6 +414,7 @@ export default function AdminOrdersPage() {
             {/* Slide image with left/right navigation */}
             <div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-dark-950 border border-gold-900/40">
               <Image
+                key={galleryIndex}
                 src={currentGalleryItem.image || PLACEHOLDER_IMG}
                 alt={currentGalleryItem.name}
                 fill
