@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const CATEGORIES = ['Pagdi/Amama', 'Jubba/Aba', 'Kurta/Thobe', 'Rumal', 'Topi', 'Others'];
+const CATEGORIES = ['Wedding Item', 'Pagdi', 'Naqab', 'Dupatta', 'Nalain Paak', 'Talbeena', 'Madecine'];
 
 const ProductSchema = new mongoose.Schema(
   {
@@ -59,6 +59,11 @@ const ProductSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Indexes for fast filtering/sorting at scale
+ProductSchema.index({ category: 1, createdAt: -1 });
+ProductSchema.index({ isFeaturedInSlider: 1 });
+ProductSchema.index({ name: 'text' });
 
 export const PRODUCT_CATEGORIES = CATEGORIES;
 
