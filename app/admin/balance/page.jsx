@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AdminNav from '@/components/AdminNav';
+import { adminFetch } from '@/lib/adminFetch';
 import { DollarSign, ArrowUpRight, Clock, CheckCircle2, Loader2, TrendingUp } from 'lucide-react';
 
 export default function AdminBalancePage() {
@@ -17,7 +18,7 @@ export default function AdminBalancePage() {
   const fetchBalance = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/balance');
+      const res = await adminFetch('/api/balance');
       const data = await res.json();
       if (data.success) {
         setSummary(data.summary || {});

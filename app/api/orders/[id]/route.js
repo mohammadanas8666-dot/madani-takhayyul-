@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import Order from '@/models/Order';
 import Balance from '@/models/Balance';
+import { requireAdmin } from '@/lib/requireAdmin';
 
 export async function GET(request, { params }) {
   try {
@@ -28,6 +29,10 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   try {
+    // Only admins can update order status/tracking
+    const authError = await requireAdmin(request);
+    if (authError) return authError;
+
     await connectToDatabase();
     const { id } = await params;
     const body = await request.json();
@@ -68,6 +73,37 @@ export async function PUT(request, { params }) {
     return NextResponse.json({ success: true, order });
   } catch (error) {
     console.error('Error updating order:', error);
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request, { params }) {
+  try {
+    // Only admins can delete orders
+    const authError = await requireAdmin(request);
+    if (authError) return authError;
+
+    await connectToDatabase();
+    const { id } = await params;
+
+    const order = await Order.findByIdAndDelete(id);
+    if (!order) {
+      return NextResponse.json(
+        { success: false, error: 'Order not found' },
+        { status: 404 }
+      );
+    }
+
+    // Clean up the linked balance/revenue record too, so it doesn't keep
+    // referencing an order that no longer exists.
+    await Balance.deleteOne({ orderId: id });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting order:', error);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }

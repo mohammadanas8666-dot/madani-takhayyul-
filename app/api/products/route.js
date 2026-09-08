@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import Product, { PRODUCT_CATEGORIES } from '@/models/Product';
+import { requireAdmin } from '@/lib/requireAdmin';
 
 export async function GET(request) {
   try {
@@ -50,6 +51,10 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    // Only admins can create products
+    const authError = await requireAdmin(request);
+    if (authError) return authError;
+
     await connectToDatabase();
     const body = await request.json();
     const { name, price, images, stock, category, color, size, fabric, isFeaturedInSlider, description } = body;

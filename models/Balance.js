@@ -20,4 +20,6 @@ const BalanceSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+BalanceSchema.index({ payoutStatus: 1, createdAt: -1 });
+
 export default mongoose.models.Balance || mongoose.model('Balance', BalanceSchema);

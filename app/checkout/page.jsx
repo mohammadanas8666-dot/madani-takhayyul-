@@ -5,19 +5,18 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
+import { smartFetch } from '@/lib/smartFetch';
 import {
-  CreditCard,
   ShieldCheck,
   MapPin,
   Loader2,
   ArrowLeft,
   MessageCircle,
-  Truck,
-  Clock,
+  LocateFixed,
 } from 'lucide-react';
 
 // Store WhatsApp number for order confirmations (with country code, no + or spaces)
-const WHATSAPP_NUMBER = '917860023820';
+const WHATSAPP_NUMBER = '9170912 68813';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -35,7 +34,10 @@ export default function CheckoutPage() {
     postalCode: '',
   });
 
-  const [loadingAction, setLoadingAction] = useState(null); // 'whatsapp' | 'cod' | null
+  const [mapLink, setMapLink] = useState('');
+  const [locating, setLocating] = useState(false);
+  const [locateError, setLocateError] = useState('');
+  const [placingOrder, setPlacingOrder] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -48,11 +50,62 @@ export default function CheckoutPage() {
     }
   }, [currentUser, dbUser]);
 
-  const shippingFee = cartTotal > 999 || cartTotal === 0 ? 0 : 99;
+  const shippingFee = 0; // Delivery is always free storewide
   const grandTotal = cartTotal + shippingFee;
 
   const handleInputChange = (e) => {
     setAddress({ ...address, [e.target.name]: e.target.value });
+  };
+
+  // "Use my current location" — gets GPS coordinates from the browser, then
+  // reverse-geocodes them into a readable address using OpenStreetMap's free
+  // Nominatim service (no API key needed). The customer can still edit
+  // anything it fills in.
+  const handleAutoDetectLocation = () => {
+    setLocateError('');
+
+    if (!navigator.geolocation) {
+      setLocateError('Location detection is not supported on this device.');
+      return;
+    }
+
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        setMapLink(`https://www.google.com/maps?q=${latitude},${longitude}`);
+
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+          );
+          const data = await res.json();
+          const addr = data.address || {};
+
+          setAddress((prev) => ({
+            ...prev,
+            street:
+              [addr.house_number, addr.road, addr.neighbourhood]
+                .filter(Boolean)
+                .join(', ') || prev.street,
+            city: addr.city || addr.town || addr.village || addr.county || prev.city,
+            state: addr.state || prev.state,
+            postalCode: addr.postcode || prev.postalCode,
+          }));
+        } catch (err) {
+          console.error('Reverse geocoding failed:', err);
+          setLocateError('Detected your location, but could not fill the address automatically. Please fill it in manually.');
+        } finally {
+          setLocating(false);
+        }
+      },
+      (err) => {
+        console.error('Geolocation error:', err);
+        setLocateError('Could not access your location. Please allow location access, or enter your address manually.');
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   };
 
   const buildOrderItems = () =>
@@ -85,59 +138,22 @@ export default function CheckoutPage() {
     return true;
   };
 
-  // Create a Pending (unpaid, Cash on Delivery) order in the database
-  const handleCodOrder = async () => {
-    if (!validateBeforeOrder()) return;
-    setLoadingAction('cod');
-    setError('');
-
-    try {
-      const res = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user: currentUser?.uid || 'guest',
-          customerName: address.fullName,
-          customerEmail: address.email,
-          items: buildOrderItems(),
-          totalAmount: grandTotal,
-          shippingAddress: buildShippingAddress(),
-          paymentId: 'COD',
-          paymentStatus: 'Pending',
-        }),
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        clearCart();
-        router.push(`/track?orderId=${data.order._id}`);
-      } else {
-        throw new Error(data.error || 'Could not place your order. Please try again.');
-      }
-    } catch (err) {
-      console.error('COD order error:', err);
-      setError(err.message || 'Could not place your order. Please try again.');
-    } finally {
-      setLoadingAction(null);
-    }
-  };
-
-  // Create a Pending order, then hand the customer off to WhatsApp with the order pre-filled
+  // Create the order, then hand the customer off to WhatsApp with everything
+  // pre-filled: items (with image links), address, phone, and a map link so
+  // the store owner can act on it immediately without asking follow-up questions.
   const handleWhatsAppOrder = async () => {
     if (!validateBeforeOrder()) return;
-    setLoadingAction('whatsapp');
+    setPlacingOrder(true);
     setError('');
 
     try {
-      const res = await fetch('/api/orders', {
+      const res = await smartFetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user: currentUser?.uid || 'guest',
           customerName: address.fullName,
           customerEmail: address.email,
           items: buildOrderItems(),
-          totalAmount: grandTotal,
           shippingAddress: buildShippingAddress(),
           paymentId: 'WHATSAPP',
           paymentStatus: 'Pending',
@@ -151,22 +167,36 @@ export default function CheckoutPage() {
 
       const orderId = data.order._id;
       const origin = window.location.origin;
+
       const itemLines = cart
-        .map(
-          (item) =>
-            `• ${item.name} x ${item.quantity} — ₹${item.price * item.quantity}\n  ${origin}/product/${item._id}`
-        )
+        .map((item) => {
+          const productUrl = `${origin}/product/${item._id}`;
+          // Only include a real hosted image link — never a raw base64 data
+          // URL (that would dump megabytes of gibberish into the message).
+          const imageUrl = item.images?.[0];
+          const safeImageUrl = imageUrl && imageUrl.startsWith('http') ? imageUrl : null;
+          return (
+            `• ${item.name} x ${item.quantity} — ₹${item.price * item.quantity}\n` +
+            `  Product: ${productUrl}` +
+            (safeImageUrl ? `\n  Image: ${safeImageUrl}` : '')
+          );
+        })
         .join('\n\n');
 
+      const addressLine = `${address.street}, ${address.city}, ${address.state} - ${address.postalCode}`;
+      const directionsLink =
+        mapLink || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressLine)}`;
+
       const message =
-        `Assalamu Alaikum, I would like to confirm my order on ROQAYYA.\n\n` +
+        `Assalamu Alaikum, I would like to confirm my order on KAZRI.\n\n` +
         `Order ID: ${orderId}\n\n` +
         `${itemLines}\n\n` +
-        `Delivery Charge: ${shippingFee === 0 ? 'FREE' : `₹${shippingFee}`}\n` +
+        `Delivery Charge: FREE\n` +
         `Total: ₹${grandTotal}\n\n` +
         `Name: ${address.fullName}\n` +
         `Phone: ${address.phone}\n` +
-        `Address: ${address.street}, ${address.city}, ${address.state} - ${address.postalCode}`;
+        `Address: ${addressLine}\n` +
+        `Location: ${directionsLink}`;
 
       const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 
@@ -177,7 +207,7 @@ export default function CheckoutPage() {
       console.error('WhatsApp order error:', err);
       setError(err.message || 'Could not place your order. Please try again.');
     } finally {
-      setLoadingAction(null);
+      setPlacingOrder(false);
     }
   };
 
@@ -185,7 +215,7 @@ export default function CheckoutPage() {
     <div className="min-h-screen flex flex-col bg-dark-950 text-slate-100">
       <Header />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         <div className="flex items-center gap-4 mb-8">
           <button
@@ -194,10 +224,10 @@ export default function CheckoutPage() {
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-3">
-            <CreditCard className="w-7 h-7 text-gold-400" />
-            Checkout & Payment
-          </h1>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-black text-white">Checkout</h1>
+            <p className="text-xs text-slate-500 mt-0.5">Fast, secure, and simple — just a couple of steps away.</p>
+          </div>
         </div>
 
         {error && (
@@ -210,10 +240,29 @@ export default function CheckoutPage() {
 
           {/* Shipping Details Form */}
           <div className="lg:col-span-2 space-y-6 bg-dark-900/70 border border-gold-900/40 rounded-3xl p-6 sm:p-8 shadow-xl">
-            <h2 className="text-lg font-black text-white flex items-center gap-2 border-b border-gold-900/40 pb-4">
-              <MapPin className="w-5 h-5 text-gold-400" />
-              Shipping Address
-            </h2>
+            <div className="flex items-center justify-between flex-wrap gap-3 border-b border-gold-900/40 pb-4">
+              <h2 className="text-lg font-black text-white flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-gold-400" />
+                Delivery Address
+              </h2>
+              <button
+                type="button"
+                onClick={handleAutoDetectLocation}
+                disabled={locating}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-dark-800 hover:bg-dark-800/70 text-gold-400 text-xs font-bold border border-gold-900/50 transition-all disabled:opacity-50"
+              >
+                {locating ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <LocateFixed className="w-3.5 h-3.5" />
+                )}
+                {locating ? 'Detecting...' : 'Use My Current Location'}
+              </button>
+            </div>
+
+            {locateError && (
+              <p className="text-xs text-amber-400 -mt-2">{locateError}</p>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -323,10 +372,10 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Payment Breakdown & Options */}
+          {/* Order Summary & Place Order */}
           <div className="bg-dark-900/90 border border-gold-900/40 rounded-3xl p-6 h-fit space-y-6 shadow-2xl">
             <h2 className="text-lg font-black text-white border-b border-gold-900/40 pb-4">
-              Payment Summary
+              Order Summary
             </h2>
 
             {/* Cart Preview List */}
@@ -348,7 +397,7 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between text-slate-400">
                 <span>Delivery Charge</span>
-                <span className="text-gold-400 font-bold">{shippingFee === 0 ? 'FREE' : `₹${shippingFee}`}</span>
+                <span className="text-gold-400 font-bold">FREE</span>
               </div>
 
               <div className="border-t border-gold-900/40 pt-3 flex justify-between text-base font-black text-white">
@@ -357,56 +406,28 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Payment Options */}
-            <div className="space-y-3">
-              {/* Online Payment — Coming Soon (compact single line) */}
-              <div className="w-full py-2.5 px-4 rounded-xl bg-dark-800 border border-gold-900/40 flex items-center justify-between gap-2 opacity-70 cursor-not-allowed select-none">
-                <span className="flex items-center gap-1.5 text-xs font-bold text-slate-400">
-                  <CreditCard className="w-3.5 h-3.5" />
-                  UPI / Cards
-                </span>
-                <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wide text-gold-400 bg-gold-500/10 border border-gold-500/30 px-2 py-0.5 rounded-full">
-                  <Clock className="w-2.5 h-2.5" /> Soon
-                </span>
-              </div>
+            {/* Place Order via WhatsApp */}
+            <button
+              type="button"
+              onClick={handleWhatsAppOrder}
+              disabled={placingOrder || cart.length === 0}
+              className="w-full py-4 rounded-xl bg-[#25D366] hover:bg-[#1ebe57] text-dark-950 font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#25D366]/20 transition-all disabled:opacity-50"
+            >
+              {placingOrder ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  <MessageCircle className="w-5 h-5" />
+                  <span>Confirm Order on WhatsApp</span>
+                </>
+              )}
+            </button>
 
-              {/* WhatsApp + COD — side by side in one row */}
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={handleWhatsAppOrder}
-                  disabled={loadingAction !== null || cart.length === 0}
-                  className="py-3.5 px-3 rounded-xl bg-[#25D366] hover:bg-[#1ebe57] text-dark-950 font-black text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 shadow-lg shadow-[#25D366]/20 transition-all disabled:opacity-50"
-                >
-                  {loadingAction === 'whatsapp' ? (
-                    <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
-                  ) : (
-                    <>
-                      <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-                      <span>WhatsApp</span>
-                    </>
-                  )}
-                </button>
+            <p className="text-center text-[11px] text-slate-500">
+              We'll open WhatsApp with your order details filled in — just hit send.
+            </p>
 
-                <button
-                  type="button"
-                  onClick={handleCodOrder}
-                  disabled={loadingAction !== null || cart.length === 0}
-                  className="py-3.5 px-3 rounded-xl bg-gold-500 hover:bg-gold-400 text-dark-950 font-black text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 shadow-lg shadow-gold-500/25 transition-all disabled:opacity-50"
-                >
-                  {loadingAction === 'cod' ? (
-                    <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
-                  ) : (
-                    <>
-                      <Truck className="w-4 h-4 sm:w-5 sm:h-5" />
-                      <span>Cash on Delivery</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <div className="text-center text-slate-500 text-[11px] space-y-1">
+            <div className="text-center text-slate-500 text-[11px] space-y-1 border-t border-gold-900/40 pt-4">
               <p className="flex items-center justify-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-gold-400" />
                 Your order details stay private & secure.
@@ -417,6 +438,7 @@ export default function CheckoutPage() {
 
         </form>
       </main>
+
     </div>
   );
 }

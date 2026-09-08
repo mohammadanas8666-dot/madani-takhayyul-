@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AdminNav from '@/components/AdminNav';
+import { adminFetch } from '@/lib/adminFetch';
 import { Users, ShieldCheck, User as UserIcon, Loader2, Search } from 'lucide-react';
 
 export default function AdminUsersPage() {
@@ -12,7 +13,7 @@ export default function AdminUsersPage() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/users');
+      const res = await adminFetch('/api/users');
       const data = await res.json();
       if (data.success) {
         setUsers(data.users || []);
@@ -31,7 +32,7 @@ export default function AdminUsersPage() {
   const handleToggleRole = async (userId, currentRole) => {
     const newRole = currentRole === 'admin' ? 'customer' : 'admin';
     try {
-      const res = await fetch('/api/users', {
+      const res = await adminFetch('/api/users', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, role: newRole }),

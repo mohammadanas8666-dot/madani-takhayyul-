@@ -15,8 +15,8 @@ const OrderItemSchema = new mongoose.Schema({
 const OrderSchema = new mongoose.Schema(
   {
     user: {
-      type: String, // Firebase UID or User ObjectId
-      required: true,
+      type: String, // Firebase UID when logged in; empty string for guest orders
+      default: '',
     },
     customerName: String,
     customerEmail: String,
@@ -54,5 +54,10 @@ const OrderSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Indexes for fast lookups at scale (admin filters, customer order history, tracking search)
+OrderSchema.index({ user: 1, createdAt: -1 });
+OrderSchema.index({ status: 1, createdAt: -1 });
+OrderSchema.index({ customerEmail: 1 });
 
 export default mongoose.models.Order || mongoose.model('Order', OrderSchema);

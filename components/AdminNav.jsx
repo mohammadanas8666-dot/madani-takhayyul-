@@ -30,7 +30,7 @@ export default function AdminNav() {
             </div>
             <div>
               <h1 className="text-lg font-black tracking-tight text-white flex items-center gap-2">
-                ROQAYYA Admin Console
+                KAZRI Admin Console
               </h1>
               <p className="text-xs text-slate-400">
                 Manage inventory, order fulfillment, finances, and user permissions

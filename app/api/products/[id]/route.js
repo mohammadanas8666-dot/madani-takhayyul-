@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import Product from '@/models/Product';
+import { requireAdmin } from '@/lib/requireAdmin';
 
 export async function GET(request, { params }) {
   try {
@@ -27,6 +28,10 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   try {
+    // Only admins can edit products
+    const authError = await requireAdmin(request);
+    if (authError) return authError;
+
     await connectToDatabase();
     const { id } = await params;
     const body = await request.json();
@@ -55,6 +60,10 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
+    // Only admins can delete products
+    const authError = await requireAdmin(request);
+    if (authError) return authError;
+
     await connectToDatabase();
     const { id } = await params;
     const product = await Product.findByIdAndDelete(id);

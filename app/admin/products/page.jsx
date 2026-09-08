@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import AdminNav from '@/components/AdminNav';
 import { useAuth } from '@/context/AuthContext';
+import { adminFetch } from '@/lib/adminFetch';
 import { PRODUCT_CATEGORIES } from '@/lib/categories';
 import {
   Package,
@@ -17,7 +18,7 @@ import {
   Search,
 } from 'lucide-react';
 
-const PLACEHOLDER_IMG = 'https://placehold.co/200x200/1a1e2e/d4af37?text=ROQAYYA';
+const PLACEHOLDER_IMG = 'https://placehold.co/200x200/1a1e2e/d4af37?text=KAZRI';
 
 const EMPTY_FORM = {
   name: '',
@@ -101,7 +102,7 @@ export default function AdminProductsPage() {
         const uploadData = new FormData();
         uploadData.append('file', file);
 
-        const res = await fetch('/api/upload', {
+        const res = await adminFetch('/api/upload', {
           method: 'POST',
           body: uploadData,
         });
@@ -145,13 +146,13 @@ export default function AdminProductsPage() {
 
       let res;
       if (editingId) {
-        res = await fetch(`/api/products/${editingId}`, {
+        res = await adminFetch(`/api/products/${editingId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
       } else {
-        res = await fetch('/api/products', {
+        res = await adminFetch('/api/products', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
@@ -175,7 +176,7 @@ export default function AdminProductsPage() {
     if (!confirm('Are you sure you want to delete this product?')) return;
 
     try {
-      const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+      const res = await adminFetch(`/api/products/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
         fetchProducts();
