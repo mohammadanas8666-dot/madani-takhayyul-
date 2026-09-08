@@ -80,7 +80,7 @@ export default function AdminProductsPage() {
       name: product.name,
       price: product.price,
       stock: product.stock,
-      category: product.category || PRODUCT_CATEGORIES[0],
+      category: PRODUCT_CATEGORIES.includes(product.category) ? product.category : '',
       color: product.color || '',
       size: product.size || '',
       fabric: product.fabric || '',
@@ -402,6 +402,9 @@ export default function AdminProductsPage() {
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     className="w-full bg-dark-950 border border-gold-900/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold-500"
                   >
+                    {formData.category === '' && (
+                      <option value="" disabled>Select a category (old category no longer valid)</option>
+                    )}
                     {PRODUCT_CATEGORIES.map((cat) => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
