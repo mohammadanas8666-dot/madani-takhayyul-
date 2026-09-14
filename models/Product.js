@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const CATEGORIES = ['Wedding Item', 'Pagdi', 'Naqab', 'Dupatta', 'Nalain Paak', 'Talbeena', 'Madecine'];
+const CATEGORIES = ['Wedding Item', 'Pagdi', 'Naqab', 'Dupatta', 'Jubba', 'Nalain Paak', 'Talbeena', 'Madecine'];
 
 const ProductSchema = new mongoose.Schema(
   {
